@@ -1,0 +1,482 @@
+
+<h2 class="sr-only">Roéma Atelier CRM v2 — Full system with prospects, automations, risk alerts, activity feed, logistics, and three-portal access.</h2>
+<style>
+.ni{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:background .1s;}
+.ni:hover{background:var(--color-background-tertiary);color:var(--color-text-primary);}
+.ni.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border-right:2px solid #B8963E;}
+.tb{padding:4px 11px;font-size:11px;border-radius:var(--border-radius-md);background:none;border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);}
+.tb.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500;border-color:var(--color-border-secondary);}
+.vb{padding:5px 13px;font-size:12px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:none;color:var(--color-text-secondary);}
+.vb.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500;}
+.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px 13px;}
+.br{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;}
+.br:hover{background:var(--color-background-secondary);padding:8px 7px;margin:0 -7px;}
+.tl{display:flex;gap:9px;margin-bottom:12px;}
+.tld{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;}
+</style>
+
+<div id="app" style="font-family:var(--font-sans);padding-top:4px;">
+<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+  <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Portal:</span>
+  <button class="vb active" id="vbtn-roema" onclick="sv('roema')"><i class="ti ti-crown" style="font-size:11px;" aria-hidden="true"></i> Roéma</button>
+  <button class="vb" id="vbtn-designer" onclick="sv('designer')"><i class="ti ti-needle-thread" style="font-size:11px;" aria-hidden="true"></i> Designer</button>
+  <button class="vb" id="vbtn-bride" onclick="sv('bride')"><i class="ti ti-diamond" style="font-size:11px;" aria-hidden="true"></i> Bride</button>
+  <span style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px;color:#0F6E56;background:#E1F5EE;padding:2px 8px;border-radius:8px;">
+    <i class="ti ti-bolt" style="font-size:11px;" aria-hidden="true"></i> 5 automations active
+  </span>
+</div>
+<div style="display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;min-height:520px;">
+  <div id="sb"></div>
+  <div id="mn" style="flex:1;padding:16px;overflow:auto;min-width:0;"></div>
+</div>
+</div>
+
+<script>
+let vw='roema',rnav='dashboard',btab='brief',bpTab='timeline',selB=null;
+const G='#B8963E';
+const sc={amber:{bg:'#FAEEDA',tx:'#854F0B'},teal:{bg:'#E1F5EE',tx:'#0F6E56'},blue:{bg:'#E6F1FB',tx:'#185FA5'},coral:{bg:'#FAECE7',tx:'#993C1D'},green:{bg:'#EAF3DE',tx:'#3B6D11'},red:{bg:'#FCEBEB',tx:'#A32D2D'}};
+
+const BS=[
+  {id:1,n:'Mei Lin Tan',i:'MT',loc:'Singapore',st:'Design review',sc:'amber',des:'Putri Rahayu',wd:'Aug 15, 2025',pp:75,pd:15000,tot:20000,mg:35,
+   brief:'Modern romantic silhouette with floral lace appliqué. Prefers ivory over pure white. Comfortable fit for 12-hour reception.',
+   kyc:'CEO of a tech startup. Very detail-oriented. Father Henry approves all decisions before bride signs off.',gk:'Henry Tan (Father)',
+   tl:[{d:'Mar 1',l:'Kickoff brief',done:1},{d:'Mar 20',l:'Design concept',done:1},{d:'Apr 10',l:'Revision #1',done:1},{d:'May 11',l:'First toile fitting',cur:1},{d:'Jun 15',l:'Fabric sign-off'},{d:'Jul 10',l:'Final fitting'},{d:'Aug 1',l:'Gown delivery'}],
+   disc:[{d:'Apr 28',f:'Putri',t:'Revised sketch sent — deeper V-neckline per your request.'},{d:'Apr 29',f:'Roéma',t:'Client approved V-neckline. Confirming button closure at back.'},{d:'May 2',f:'Bride',t:'Prefer zip closure — easier to put on alone.'}]},
+  {id:2,n:'Priya Sharma',i:'PS',loc:'London, UK',st:'Fitting stage',sc:'teal',des:'Putri Rahayu',wd:'Sep 22, 2025',pp:50,pd:14000,tot:28000,mg:42,
+   brief:'Indo-Western fusion with gold zardosi embroidery. Colorway: blush + gold.',
+   kyc:'NRI bride, London. Mother Anita is very involved. Keep bridalwear aesthetic for in-laws.',gk:'Mrs. Anita Sharma (Mother)',
+   tl:[{d:'Feb 10',l:'Kickoff brief',done:1},{d:'Feb 28',l:'Mood board',done:1},{d:'Mar 22',l:'Design sign-off',done:1},{d:'Apr 18',l:'Embroidery approval',done:1},{d:'May 20',l:'First fitting (London)',cur:1},{d:'Jul 5',l:'Final fitting'},{d:'Sep 10',l:'Delivery'}],
+   disc:[{d:'May 1',f:'Putri',t:'Embroidery sample sent via DHL. ETA May 12.'},{d:'May 3',f:'Bride',t:'Received! Gold thread is perfect — can we increase density on bodice?'},{d:'May 8',f:'Roéma',t:'Confirming with Putri — she will respond by May 10.'}]},
+  {id:3,n:'Sofia Chen',i:'SC',loc:'Hong Kong',st:'Brief confirmed',sc:'blue',des:'Putri Rahayu',wd:'Nov 10, 2025',pp:25,pd:3500,tot:14000,mg:38,
+   brief:'Clean structured column gown. Minimal. Off-white/champagne. Possible slit.',
+   kyc:'Finance professional. Precise and time-driven. Wants weekly updates. No surprises.',gk:'Sofia Chen (direct)',
+   tl:[{d:'Apr 20',l:'Kickoff brief',done:1},{d:'May 10',l:'Design concept',cur:1,over:1},{d:'Jun 5',l:'Design sign-off'},{d:'Jul 15',l:'First toile'},{d:'Sep 1',l:'Fitting'},{d:'Oct 15',l:'Final fitting'},{d:'Nov 1',l:'Delivery'}],
+   disc:[{d:'Apr 25',f:'Roéma',t:'Welcome sent. Design questionnaire shared.'},{d:'Apr 26',f:'Bride',t:'Questionnaire completed. Reference images attached.'}]}
+];
+
+const PROS=[
+  {id:1,n:'Sarah Lim',ph:'+65 9123 4567',loc:'Bali',wd:'Mar 2026',bgt:'SGD 15k',rcv:'10 min ago',st:'new',msg:"Hi, I'm Sarah, getting married in Bali in March 2026, I'd love a custom gown, budget around SGD 15k"},
+  {id:2,n:'Anika Patel',ph:'+44 7700 900123',loc:'London, UK',wd:'Jun 2026',bgt:'GBP 12k',rcv:'2 hrs ago',st:'qualified',msg:"Hello! Seen your work on Instagram. I have a June 2026 wedding in London, looking for something unique around GBP 12k"},
+  {id:3,n:'Chen Wei',ph:'+852 9876 5432',loc:'Hong Kong',wd:'Oct 2026',bgt:'HKD 80k',rcv:'Yesterday',st:'brief_booked',msg:"Looking for a bespoke gown for Oct 2026 HK wedding, have a budget of HKD 80k, can we set up a call?"},
+];
+
+const LOGI=[
+  {bride:'Priya',item:'Embroidery sample',courier:'DHL',num:'DHL9234812',st:'in_transit',eta:'May 12'},
+  {bride:'Mei Lin',item:'Lace fabric swatches',courier:'FedEx',num:'FEX7891234',st:'delivered',eta:'May 9'},
+];
+
+const OVERDUES=[
+  {bride:'Priya Sharma',item:'Embroidery density sign-off',days:3,pic:'Putri',email:'putri@designer.id',sc:'teal'},
+  {bride:'Sofia Chen',item:'Design concept delivery',days:1,pic:'Putri',email:'putri@designer.id',sc:'blue'},
+];
+
+const ACTIVITY=[
+  {time:'2h ago',ic:'ti-message',txt:"Priya S. replied: 'Can we increase density on bodice?'",type:'design'},
+  {time:'4h ago',ic:'ti-mail',txt:'Payment reminder auto-sent to Mei Lin (7 days before due)',type:'payment'},
+  {time:'Today',ic:'ti-alert-triangle',txt:'Overdue alert emailed to putri@designer.id (Sofia — design concept)',type:'alert'},
+  {time:'Yesterday',ic:'ti-user-plus',txt:'New WA prospect: Sarah Lim (+65 9123 4567)',type:'prospect'},
+  {time:'Yesterday',ic:'ti-truck',txt:'DHL9234812 in transit to Singapore · ETA May 12',type:'logistics'},
+  {time:'2d ago',ic:'ti-check',txt:'Mei Lin: Design revision #1 marked complete',type:'milestone'},
+];
+
+const COMMS=[
+  {bride:'Sofia Chen',last:'9 days',sc:'blue',st:'Brief confirmed',i:'SC'},
+  {bride:'Priya Sharma',last:'5 days',sc:'teal',st:'Fitting stage',i:'PS'},
+];
+
+function bdg(lbl,key){const c=sc[key]||sc.blue;return`<span class="pill" style="background:${c.bg};color:${c.tx};">${lbl}</span>`;}
+function av(ini,key,sz){const c=sc[key]||sc.blue;const s=sz||28;return`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${c.bg};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${Math.round(s*.37)}px;font-weight:500;flex-shrink:0;">${ini}</div>`;}
+
+function rSB(){
+  if(vw!=='roema'){document.getElementById('sb').innerHTML='';return;}
+  const items=[
+    {id:'dashboard',ic:'ti-layout-dashboard',l:'Dashboard'},
+    {id:'prospects',ic:'ti-brand-whatsapp',l:'Prospects',badge:'3'},
+    {id:'brides',ic:'ti-heart',l:'Brides'},
+    {id:'books',ic:'ti-book',l:'Books'},
+    {id:'team',ic:'ti-users',l:'Team & settings'},
+  ];
+  document.getElementById('sb').innerHTML=`<div style="width:155px;background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;flex-shrink:0;">
+    <div style="padding:12px 14px 10px;border-bottom:0.5px solid var(--color-border-tertiary);">
+      <div style="font-size:12px;font-weight:500;">Roéma Atelier</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);">Master portal</div>
+    </div>
+    ${items.map(x=>`<div class="ni ${rnav===x.id?'active':''}" onclick="sn('${x.id}')">
+      <i class="ti ${x.ic}" style="font-size:13px;" aria-hidden="true"></i>
+      <span style="flex:1;">${x.l}</span>
+      ${x.badge?`<span style="font-size:9px;background:#FAEEDA;color:#854F0B;padding:1px 5px;border-radius:8px;">${x.badge}</span>`:''}
+    </div>`).join('')}
+    <div style="margin-top:auto;padding:10px 14px;border-top:0.5px solid var(--color-border-tertiary);">
+      <div style="font-size:9px;color:#0F6E56;display:flex;align-items:center;gap:4px;"><i class="ti ti-bolt" style="font-size:10px;" aria-hidden="true"></i> WA auto-intake on</div>
+      <div style="font-size:9px;color:#0F6E56;display:flex;align-items:center;gap:4px;margin-top:2px;"><i class="ti ti-mail" style="font-size:10px;" aria-hidden="true"></i> Alert emails active</div>
+    </div>
+  </div>`;}
+
+function rMN(){
+  const el=document.getElementById('mn');
+  if(vw==='roema'){
+    if(rnav==='dashboard') el.innerHTML=rDash();
+    else if(rnav==='prospects') el.innerHTML=rPros();
+    else if(rnav==='brides') el.innerHTML=selB?rBD():rBL();
+    else if(rnav==='books') el.innerHTML=rBooks();
+    else el.innerHTML=rTeam();
+  } else if(vw==='designer') el.innerHTML=rDes();
+  else el.innerHTML=rBride();
+}
+
+function rDash(){
+  const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const evts={5:'amber',11:'teal',15:'coral',22:'amber',28:'blue'};
+  let cells='';
+  for(let i=0;i<4;i++) cells+='<div></div>';
+  for(let i=1;i<=31;i++){
+    const isTd=i===11;const ev=evts[i];
+    cells+=`<div style="text-align:center;padding:3px 1px;font-size:10px;border-radius:3px;${isTd?'background:var(--color-background-info);color:var(--color-text-info);font-weight:500;':''}">${i}${ev&&!isTd?`<div style="width:3px;height:3px;border-radius:50%;background:${sc[ev].tx};margin:0 auto;"></div>`:''}</div>`;
+  }
+  const actColors={design:'blue',payment:'amber',alert:'red',prospect:'teal',logistics:'coral',milestone:'green'};
+  return`<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:15px;font-weight:500;">Dashboard</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);">May 11, 2026</div>
+    </div>
+
+    <div style="background:#FCEBEB;border:0.5px solid #F09595;border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:500;color:#A32D2D;margin-bottom:5px;display:flex;align-items:center;gap:5px;"><i class="ti ti-alert-triangle" style="font-size:13px;" aria-hidden="true"></i> ${OVERDUES.length} overdue — email alerts auto-sent to PIC</div>
+      ${OVERDUES.map(o=>`<div style="display:flex;align-items:center;gap:7px;font-size:11px;padding:2px 0;flex-wrap:wrap;">${bdg(o.bride,o.sc)}<span style="color:var(--color-text-primary);">${o.item}</span><span style="color:#A32D2D;font-weight:500;">${o.days}d overdue</span><span style="margin-left:auto;" class="pill" style="background:#FCEBEB;color:#A32D2D;"><i class="ti ti-mail" style="font-size:9px;" aria-hidden="true"></i> emailed ${o.email}</span></div>`).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:10px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-filter" style="font-size:12px;" aria-hidden="true"></i> Pipeline funnel</div>
+      <div style="display:flex;gap:0;">
+        ${[['Prospects','3','amber','ti-brand-whatsapp'],['Brief','2','blue','ti-file-text'],['Production','2','teal','ti-needle-thread'],['Fitting','1','coral','ti-shirt'],['Delivered','0','green','ti-package']].map(([l,n,c,ic],i,arr)=>`<div style="flex:1;background:${sc[c].bg};padding:8px 6px;text-align:center;${i===0?'border-radius:var(--border-radius-md) 0 0 var(--border-radius-md);':''}${i===arr.length-1?'border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;':''}">
+          <i class="ti ${ic}" style="font-size:13px;color:${sc[c].tx};" aria-hidden="true"></i>
+          <div style="font-size:16px;font-weight:500;color:${sc[c].tx};">${n}</div>
+          <div style="font-size:9px;color:${sc[c].tx};">${l}</div>
+        </div>${i<arr.length-1?`<div style="width:1px;background:var(--color-background-primary);flex-shrink:0;"></div>`:''}`).join('')}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="card" style="padding:10px 12px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-calendar" style="font-size:12px;" aria-hidden="true"></i> May 2026</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:6px;">
+          ${days.map(d=>`<div style="text-align:center;font-size:9px;color:var(--color-text-tertiary);padding:1px;">${d}</div>`).join('')}${cells}
+        </div>
+        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:6px;">
+          ${[['teal','May 11 · Mei Lin: toile fitting'],['amber','May 15 · Priya: payment due'],['blue','May 20 · Team: Jakarta trip']].map(([c,l])=>`<div style="font-size:10px;display:flex;align-items:center;gap:5px;margin-bottom:2px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc[c].tx};flex-shrink:0;display:inline-block;"></span>${l}</div>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div class="card" style="padding:10px 12px;">
+          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar" style="font-size:12px;" aria-hidden="true"></i> Revenue</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+            ${[['Contracted','$62k',''],['Collected','$32.5k','#1D9E75'],['Avg margin','38%',''],['Pipeline','$41k','#854F0B']].map(([l,v,c])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:14px;font-weight:500;${c?'color:'+c:''}">${v}</div></div>`).join('')}
+          </div>
+        </div>
+        <div class="card" style="padding:10px 12px;">
+          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:4px;"><i class="ti ti-clock" style="font-size:12px;" aria-hidden="true"></i> Payment aging</div>
+          ${[['Priya Sharma','$7,000','14d overdue','red'],['Mei Lin Tan','$5,000','Due Jun 15','amber'],['Sofia Chen','$3,500','On track','green']].map(([n,a,s,c])=>`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <span style="flex:1;color:var(--color-text-primary);">${n}</span><span style="font-weight:500;">${a}</span><span style="color:${sc[c].tx};font-size:10px;">${s}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="card" style="padding:10px 12px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-activity" style="font-size:12px;" aria-hidden="true"></i> Activity feed</div>
+        ${ACTIVITY.map(a=>{const c=actColors[a.type]||'blue';return`<div style="display:flex;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+          <div style="width:20px;height:20px;border-radius:50%;background:${sc[c].bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+            <i class="ti ${a.ic}" style="font-size:11px;color:${sc[c].tx};" aria-hidden="true"></i>
+          </div>
+          <div style="flex:1;min-width:0;"><div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.txt}</div><div style="font-size:9px;color:var(--color-text-tertiary);">${a.time}</div></div>
+        </div>`}).join('')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div class="card" style="padding:10px 12px;">
+          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-message-exclamation" style="font-size:12px;" aria-hidden="true"></i> Communication gaps</div>
+          ${COMMS.map(c=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+            ${av(c.i,c.sc,24)}
+            <div style="flex:1;"><div style="font-size:11px;font-weight:500;">${c.bride}</div><div style="font-size:10px;color:var(--color-text-secondary);">${c.st}</div></div>
+            <span class="pill" style="background:#FCEBEB;color:#A32D2D;">${c.last} no contact</span>
+          </div>`).join('')}
+          <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:6px;"><i class="ti ti-info-circle" style="font-size:10px;" aria-hidden="true"></i> Flagged after 5 days of silence</div>
+        </div>
+        <div class="card" style="padding:10px 12px;">
+          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-truck" style="font-size:12px;" aria-hidden="true"></i> Logistics</div>
+          ${LOGI.map(l=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;font-weight:500;">${l.bride}: ${l.item}</span></div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
+              <span style="font-size:10px;color:var(--color-text-secondary);">${l.courier} ${l.num}</span>
+              <span class="pill" style="background:${l.st==='delivered'?sc.green.bg:sc.amber.bg};color:${l.st==='delivered'?sc.green.tx:sc.amber.tx};">${l.st==='delivered'?'✓ Delivered':'In transit · ETA '+l.eta}</span>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:10px 12px;">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-plane" style="font-size:12px;" aria-hidden="true"></i> Team travel</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+        ${[['May 20–22','Jakarta, ID','Priya fitting'],['Jun 8–10','Singapore','Mei Lin toile'],['Jul 15','Hong Kong','Sofia fitting']].map(([d,c,n])=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px;"><div style="font-size:9px;color:var(--color-text-secondary);">${d}</div><div style="font-size:12px;font-weight:500;">${c}</div><div style="font-size:10px;color:var(--color-text-secondary);">${n}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;}
+
+function rPros(){
+  const stMap={new:{label:'New',c:'amber'},qualified:{label:'Qualified',c:'teal'},brief_booked:{label:'Brief booked',c:'green'}};
+  return`<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div style="font-size:15px;font-weight:500;">Prospects</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:4px;"><i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;" aria-hidden="true"></i> Auto-captured from WhatsApp Business</div>
+      </div>
+      <span class="pill" style="background:#E1F5EE;color:#0F6E56;font-size:10px;"><i class="ti ti-bolt" style="font-size:10px;" aria-hidden="true"></i> AI extraction active</span>
+    </div>
+    ${PROS.map(p=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px;margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:8px;">
+        ${av(p.n.split(' ').map(x=>x[0]).join('').substring(0,2),'amber',30)}
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+            <span style="font-size:13px;font-weight:500;">${p.n}</span>
+            ${bdg(stMap[p.st].label,stMap[p.st].c)}
+          </div>
+          <div style="font-size:10px;color:var(--color-text-secondary);">${p.ph} · received ${p.rcv}</div>
+        </div>
+        <div style="text-align:right;font-size:10px;color:var(--color-text-secondary);">
+          <i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;" aria-hidden="true"></i> WA
+        </div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:7px 9px;font-size:11px;color:var(--color-text-secondary);font-style:italic;margin-bottom:8px;">"${p.msg}"</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+        ${[['ti-map-pin',p.loc],['ti-calendar',p.wd],['ti-currency-dollar',p.bgt]].map(([ic,v])=>`<span class="pill" style="background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-tertiary);"><i class="ti ${ic}" style="font-size:10px;" aria-hidden="true"></i> ${v}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;">Reply on WA</button>
+        <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;">Book brief call</button>
+        <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid #B8963E;color:#B8963E;background:none;cursor:pointer;margin-left:auto;">Convert to bride →</button>
+      </div>
+    </div>`).join('')}
+  </div>`;}
+
+function rBL(){
+  return`<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:15px;font-weight:500;">Brides</div>
+      <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
+    </div>
+    ${BS.map(b=>`<div class="br" onclick="sb2(${b.id})">${av(b.i,b.sc)}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;">${b.n}</div>
+        <div style="font-size:10px;color:var(--color-text-secondary);">${b.loc} · ${b.wd}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">${bdg(b.st,b.sc)}<div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">${b.pp}% paid</div></div>
+      <i class="ti ti-chevron-right" style="font-size:13px;color:var(--color-text-tertiary);" aria-hidden="true"></i>
+    </div>`).join('')}
+  </div>`;}
+
+function rBD(){
+  const b=BS.find(x=>x.id===selB);
+  const tabs=[['brief','Brief'],['timeline','Timeline'],['design','Design'],['payments','Payments'],['notes','Internal notes']];
+  let c='';
+  if(btab==='brief'){
+    c=`<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;font-size:12px;line-height:1.6;margin-bottom:9px;">${b.brief}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      ${[['Designer',b.des,''],['Wedding',b.wd,''],['Location',b.loc,''],['Status',b.st,b.sc]].map(([l,v,k])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:12px;font-weight:500;margin-top:1px;">${k?bdg(v,k):v}</div></div>`).join('')}
+    </div>`;
+  } else if(btab==='timeline'){
+    c=b.tl.map(s=>`<div class="tl">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tld" style="background:${s.done?'#1D9E75':s.cur?G:s.over?'#E24B4A':'var(--color-border-secondary)'}"></div>
+        <div style="width:1px;flex:1;min-height:16px;background:var(--color-border-tertiary);"></div>
+      </div>
+      <div style="flex:1;padding-bottom:2px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);">${s.d}</div>
+        <div style="font-size:12px;${s.done?'color:var(--color-text-secondary);text-decoration:line-through;':s.cur?'font-weight:500;':s.over?'color:#A32D2D;font-weight:500;':''}">${s.l}</div>
+        ${s.cur?`<span class="pill" style="background:#FAEEDA;color:#854F0B;">Current</span>`:''}
+        ${s.over?`<span class="pill" style="background:#FCEBEB;color:#A32D2D;"><i class="ti ti-mail" style="font-size:9px;" aria-hidden="true"></i> Overdue — email sent</span>`:''}
+      </div>
+    </div>`).join('');
+  } else if(btab==='design'){
+    c=b.disc.map(d=>`<div style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><span style="font-size:11px;font-weight:500;color:${d.f==='Bride'?sc.blue.tx:d.f==='Putri'?sc.teal.tx:sc.amber.tx};">${d.f}</span><span style="font-size:9px;color:var(--color-text-tertiary);">${d.d}</span></div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:7px 9px;font-size:12px;line-height:1.5;">${d.t}</div>
+    </div>`).join('')+`<div style="margin-top:10px;border-top:0.5px solid var(--color-border-tertiary);padding-top:9px;display:flex;gap:6px;">
+      <input type="text" placeholder="Add a note..." style="flex:1;font-size:12px;">
+      <button style="padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;"><i class="ti ti-upload" style="font-size:12px;" aria-hidden="true"></i></button>
+      <button style="padding:5px 9px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;font-size:12px;">Send</button>
+    </div>`;
+  } else if(btab==='payments'){
+    const out=b.tot-b.pd;
+    c=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px;">
+      ${[['Contract','$'+b.tot.toLocaleString(),''],['Collected','$'+b.pd.toLocaleString(),'#1D9E75'],['Outstanding','$'+out.toLocaleString(),'#D85A30']].map(([l,v,col])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:14px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:4px;padding:2px;margin-bottom:7px;"><div style="height:6px;border-radius:3px;background:#1D9E75;width:${b.pp}%;"></div></div>
+    <div style="font-size:10px;color:var(--color-text-secondary);text-align:right;margin-bottom:9px;">${b.pp}% collected</div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 80px 70px 90px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:5px;"><span>Milestone</span><span>Amount</span><span>Status</span><span>Reminder</span></div>
+      ${[['Deposit (25%)',b.tot*.25,b.pp>=25,'—'],['2nd payment (25%)',b.tot*.25,b.pp>=50,'Auto-sent 7d'],['3rd payment (25%)',b.tot*.25,b.pp>=75,'Scheduled'],['Final (25%)',b.tot*.25,b.pp>=100,'Scheduled']].map(([m,a,paid,rem])=>`<div style="display:grid;grid-template-columns:1fr 80px 70px 90px;font-size:11px;padding:7px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:5px;"><span>${m}</span><span>$${a.toLocaleString()}</span><span style="color:${paid?'#0F6E56':'var(--color-text-secondary)'};">${paid?'✓ Paid':'Pending'}</span><span style="font-size:10px;color:var(--color-text-secondary);">${rem}</span></div>`).join('')}
+    </div>`;
+  } else {
+    c=`<div style="display:flex;align-items:center;gap:5px;margin-bottom:9px;"><i class="ti ti-lock" style="font-size:13px;color:var(--color-text-secondary);" aria-hidden="true"></i><span style="font-size:11px;color:var(--color-text-secondary);">Roéma + Designer only</span></div>
+    ${[['KYC profile',b.kyc],['Gatekeeper',b.gk]].map(([t,v])=>`<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;margin-bottom:7px;"><div style="font-size:10px;font-weight:500;margin-bottom:3px;">${t}</div><div style="font-size:12px;line-height:1.6;">${v}</div></div>`).join('')}
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;">
+      <div style="font-size:10px;font-weight:500;margin-bottom:5px;">Add internal note</div>
+      <textarea placeholder="Notes, sensitivities, preferences..." style="width:100%;font-size:12px;padding:6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);resize:none;height:52px;box-sizing:border-box;"></textarea>
+      <button style="margin-top:4px;font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;">Save</button>
+    </div>`;
+  }
+  return`<div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:11px;">
+      <button onclick="sb2(null)" style="border:none;background:none;cursor:pointer;font-size:12px;color:var(--color-text-secondary);padding:0;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-left" style="font-size:13px;" aria-hidden="true"></i>Brides</button>
+      <span style="color:var(--color-text-tertiary);">/</span><span style="font-size:13px;font-weight:500;">${b.n}</span>
+      <span style="margin-left:auto;">${bdg(b.st,b.sc)}</span>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:11px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:9px;">
+      ${tabs.map(([t,l])=>`<button class="tb ${btab===t?'active':''}" onclick="sbt('${t}')">${l}</button>`).join('')}
+    </div>${c}</div>`;}
+
+function rBooks(){
+  return`<div>
+    <div style="font-size:15px;font-weight:500;margin-bottom:11px;">Books</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px;">
+      ${[['Contracted','$62,000',''],['Collected','$32,500','#1D9E75'],['Avg margin','38%','']].map(([l,v,c])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:17px;font-weight:500;${c?'color:'+c:''}">${v}</div></div>`).join('')}
+    </div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:4px;"><span>Bride</span><span>Contract</span><span>Paid</span><span>Outstanding</span><span>Margin</span><span>Status</span></div>
+      ${BS.map(b=>`<div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:11px;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:4px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:5px;">${av(b.i,b.sc,22)}<span>${b.n.split(' ')[0]}</span></div>
+        <span>$${b.tot.toLocaleString()}</span><span style="color:#1D9E75;">$${b.pd.toLocaleString()}</span>
+        <span style="color:#D85A30;">$${(b.tot-b.pd).toLocaleString()}</span><span>${b.mg}%</span>${bdg(b.st,b.sc)}
+      </div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:11px;font-weight:500;padding:8px 10px;border-top:0.5px solid var(--color-border-secondary);gap:4px;background:var(--color-background-secondary);">
+        <span>Total</span><span>$62,000</span><span style="color:#1D9E75;">$32,500</span><span style="color:#D85A30;">$29,500</span><span>38%</span><span></span>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:6px;"><i class="ti ti-lock" style="font-size:10px;" aria-hidden="true"></i> Admin only</div>
+  </div>`;}
+
+function rTeam(){
+  return`<div>
+    <div style="font-size:15px;font-weight:500;margin-bottom:11px;">Team & settings</div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:9px;">
+      <div style="font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 12px;">Members</div>
+      ${[{n:'You (Admin)',e:'hi@roemaatelier.com',r:'Roéma admin',i:'RA',c:'amber'},{n:'Putri Rahayu',e:'putri@designer.id',r:'Designer',i:'PR',c:'teal'}].map(m=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-top:0.5px solid var(--color-border-tertiary);">${av(m.i,m.c)}<div style="flex:1;"><div style="font-size:12px;font-weight:500;">${m.n}</div><div style="font-size:10px;color:var(--color-text-secondary);">${m.e}</div></div><span style="font-size:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);padding:2px 7px;border-radius:8px;">${m.r}</span>${m.r!=='Roéma admin'?`<button style="font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:#A32D2D;">Remove</button>`:''}</div>`).join('')}
+    </div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px;margin-bottom:9px;">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;"><i class="ti ti-bell" style="font-size:13px;" aria-hidden="true"></i> Auto-notification rules</div>
+      ${[
+        ['Payment reminder','Email + WA to bride','7, 3, 1 day before due','green','active'],
+        ['Milestone overdue','Email to PIC immediately','Fires same day','red','active'],
+        ['Communication gap','Email to Roéma team','After 5 days silence','amber','active'],
+        ['New WA prospect','Slack/email to Roéma','Instant on WA receipt','teal','active'],
+        ['Logistics update','Email to bride + Roéma','On courier webhook','blue','active'],
+      ].map(([t,r,w,c,st])=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+        <div style="width:6px;height:6px;border-radius:50%;background:${sc[c].tx};flex-shrink:0;margin-top:4px;"></div>
+        <div style="flex:1;"><div style="font-size:11px;font-weight:500;">${t}</div><div style="font-size:10px;color:var(--color-text-secondary);">${r} · ${w}</div></div>
+        <span class="pill" style="background:${sc[c].bg};color:${sc[c].tx};">● ${st}</span>
+      </div>`).join('')}
+    </div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px;">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;">Invite member</div>
+      <div style="display:flex;gap:6px;">
+        <input type="email" placeholder="Email address" style="flex:1;font-size:12px;">
+        <select style="font-size:12px;padding:5px 7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
+          <option>Roéma admin</option><option>Designer</option>
+        </select>
+        <button style="font-size:12px;padding:5px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;">Invite</button>
+      </div>
+    </div>
+  </div>`;}
+
+function rDes(){
+  return`<div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+      <div><div style="font-size:15px;font-weight:500;">Good morning, Putri</div><div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier · Designer portal</div></div>
+      <span class="pill" style="background:#FCEBEB;color:#A32D2D;"><i class="ti ti-mail" style="font-size:10px;" aria-hidden="true"></i> 2 alert emails received</span>
+    </div>
+    <div style="background:#FCEBEB;border:0.5px solid #F09595;border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:500;color:#A32D2D;margin-bottom:4px;"><i class="ti ti-alert-triangle" style="font-size:12px;" aria-hidden="true"></i> 2 items need your attention</div>
+      ${OVERDUES.map(o=>`<div style="font-size:11px;padding:2px 0;color:#A32D2D;">${bdg(o.bride,o.sc)} ${o.item} — ${o.days}d overdue</div>`).join('')}
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px 12px;margin-bottom:10px;border-left:2px solid ${G};">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;"><i class="ti ti-bell" style="font-size:11px;" aria-hidden="true"></i> Action needed today</div>
+      <div style="font-size:12px;font-weight:500;">Mei Lin Tan — Toile fitting (May 11)</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);">Ensure toile is ready and measurements confirmed.</div>
+    </div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px;">My brides</div>
+    ${BS.map(b=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px;margin-bottom:7px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:7px;">${av(b.i,b.sc)}<div><div style="font-size:12px;font-weight:500;">${b.n}</div><div style="font-size:10px;color:var(--color-text-secondary);">${b.wd}</div></div></div>${bdg(b.st,b.sc)}
+      </div>
+      <div style="font-size:10px;color:var(--color-text-secondary);">Next</div>
+      <div style="font-size:12px;font-weight:500;">${b.tl.find(t=>!t.done)?.l||'Done'} <span style="font-weight:400;color:var(--color-text-secondary);">· ${b.tl.find(t=>!t.done)?.d||''}</span></div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;margin-top:5px;font-size:11px;color:var(--color-text-secondary);">${b.disc[b.disc.length-1].f}: "${b.disc[b.disc.length-1].t.substring(0,55)}..."</div>
+      ${b.id===1?`<div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;margin-top:5px;font-size:10px;color:var(--color-text-secondary);"><i class="ti ti-lock" style="font-size:10px;" aria-hidden="true"></i> Gatekeeper: Henry Tan (father) approves all decisions.</div>`:''}
+    </div>`).join('')}
+  </div>`;}
+
+function rBride(){
+  const b=BS[0];
+  const tabs=[['timeline','My timeline'],['design','Design board'],['payments','Payments']];
+  let c='';
+  if(bpTab==='timeline'){
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Your gown journey</div>`+b.tl.map(s=>`<div class="tl">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tld" style="background:${s.done?'#1D9E75':s.cur?G:'var(--color-border-secondary)'}"></div>
+        <div style="width:1px;flex:1;min-height:16px;background:var(--color-border-tertiary);"></div>
+      </div>
+      <div style="flex:1;padding-bottom:2px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);">${s.d}</div>
+        <div style="font-size:12px;${s.done?'color:var(--color-text-secondary);text-decoration:line-through;':s.cur?'font-weight:500;':''}">${s.l}</div>
+        ${s.done?`<span style="font-size:9px;color:#1D9E75;">Completed</span>`:''}
+        ${s.cur?`<span class="pill" style="background:#FAEEDA;color:#854F0B;">We are here</span>`:''}
+      </div>
+    </div>`).join('');
+  } else if(bpTab==='design'){
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Design conversation</div>`+
+    b.disc.map(d=>`<div style="margin-bottom:7px;">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px;"><span style="font-size:11px;font-weight:500;">${d.f}</span><span style="font-size:9px;color:var(--color-text-tertiary);">${d.d}</span></div>
+      <div style="background:${d.f==='Bride'?'var(--color-background-info)':'var(--color-background-secondary)'};border-radius:var(--border-radius-md);padding:7px 9px;font-size:12px;line-height:1.5;">${d.t}</div>
+    </div>`).join('')+
+    `<div style="margin-top:9px;border-top:0.5px solid var(--color-border-tertiary);padding-top:9px;display:flex;gap:6px;">
+      <input type="text" placeholder="Send a message or photo to Roéma..." style="flex:1;font-size:12px;">
+      <button style="padding:5px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;"><i class="ti ti-upload" style="font-size:12px;" aria-hidden="true"></i></button>
+    </div>`;
+  } else {
+    const out=b.tot-b.pd;
+    c=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px;">
+      ${[['Total investment','$'+b.tot.toLocaleString(),''],['Outstanding','$'+out.toLocaleString(),'#D85A30']].map(([l,v,col])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:16px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:4px;padding:2px;margin-bottom:7px;"><div style="height:6px;border-radius:3px;background:#1D9E75;width:${b.pp}%;"></div></div>
+    <div style="font-size:10px;color:var(--color-text-secondary);text-align:right;margin-bottom:9px;">${b.pp}% paid</div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px;">
+      <div style="font-size:10px;font-weight:500;margin-bottom:3px;">Next payment</div>
+      <div style="font-size:14px;font-weight:500;color:#D85A30;">$${(b.tot*0.25).toLocaleString()}</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);">Due Jun 15, 2025 · Fabric sign-off</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;"><i class="ti ti-bell" style="font-size:10px;" aria-hidden="true"></i> You will receive a reminder 7, 3, and 1 day before</div>
+    </div>`;
+  }
+  return`<div>
+    <div style="border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:10px;margin-bottom:11px;">
+      <div style="font-size:15px;font-weight:500;">Hello, Mei Lin</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier bride portal · ${b.wd}</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:8px 11px;margin-bottom:11px;display:flex;align-items:center;gap:7px;">
+      <div style="width:6px;height:6px;border-radius:50%;background:${G};flex-shrink:0;"></div>
+      <div><div style="font-size:12px;font-weight:500;">Current stage: ${b.st}</div><div style="font-size:10px;color:var(--color-text-secondary);">Next: Fabric sign-off · Jun 15</div></div>
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:11px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:9px;">
+      ${tabs.map(([t,l])=>`<button class="tb ${bpTab===t?'active':''}" onclick="sbpt('${t}')">${l}</button>`).join('')}
+    </div>${c}</div>`;}
+
+function sv(v){vw=v;['roema','designer','bride'].forEach(id=>document.getElementById('vbtn-'+id).classList.toggle('active',id===v));if(v==='roema')rnav='dashboard';render();}
+function sn(n){rnav=n;selB=null;render();}
+function sb2(id){selB=id;btab='brief';render();}
+function sbt(t){btab=t;rMN();}
+function sbpt(t){bpTab=t;rMN();}
+function render(){rSB();rMN();}
+render();
+</script>
