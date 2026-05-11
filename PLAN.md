@@ -22,7 +22,7 @@ A **three-portal web app** with role-based access:
 2. **Designer portal** — designer-specific view of assigned brides and tasks
 3. **Bride portal** — branded, white-labeled bride-facing experience (timeline, design board, payments)
 
-Plus automated workflows: WhatsApp intake, payment reminders, overdue alerts, communication-gap detection, logistics tracking.
+Plus automated workflows: payment reminders, overdue alerts, communication-gap detection, logistics tracking. (WhatsApp two-way deferred to v2 — see Deferred section.)
 
 ---
 
@@ -38,8 +38,8 @@ Plus automated workflows: WhatsApp intake, payment reminders, overdue alerts, co
 - Communication gap detection (5+ days no contact → flag)
 - Logistics tracking (courier + tracking number per shipment)
 - Auto-notification rules (payment reminders, overdue alerts, etc.)
-- Prospects auto-capture from WhatsApp Business
 - Team & settings (member roles, invite flow)
+- _(Prospects auto-capture from WhatsApp moved to v2 along with full WA integration)_
 
 ### New features to add
 
@@ -49,12 +49,15 @@ Plus automated workflows: WhatsApp intake, payment reminders, overdue alerts, co
 | 📏 **Measurements module** | Structured form replacing PDF measurement sheets |
 | 💳 **Payment links** | **Airwallex integration** — branded payment links, multi-currency, auto-mark "Collected" via webhook |
 | 📅 **Google Calendar sync** | Push fittings/milestones into team members' existing calendars |
-| 📨 **WhatsApp two-way messaging** | Reply to brides from inside the ops system. Full message history logged per bride. Auto-tag who replied |
 | 🤝 **Referral tracking** | Where did each bride come from? (Past bride / IG / trunk show / etc.) for marketing ROI |
 | 📊 **Designer P&L** | Hours per gown × designer rate → real margin per project |
+| ⭐ **Bride tiers (RCL / Standard / Sponsored)** | RCL = Roéma Complete Lead (premium service); visible across all views |
+| 💼 **Designer payout tracker** | Internal Roéma ↔ Designer payment flow with per-bride profit share % |
+| 🗓️ **Monthly calendar views** | Designer & bride see milestones as a calendar (linear timeline still available as secondary) |
 
-### Explicitly deferred
+### Deferred to v2 (after launch)
 
+- ⏸️ **WhatsApp two-way messaging** — Reviewed and deferred. Reasons: 2–4 week WhatsApp Business API approval, ~$30–100/mo ongoing cost, 24-hour message window rule, no group chat support, existing history doesn't migrate. Team will continue using WhatsApp normally on phones and manually log key items into the ops system. Revisit in 3–6 months once v1 is in use. If pain is real, evaluate off-the-shelf tools (Respond.io, Wati) before custom build.
 - ❌ Contract / e-signature (not needed)
 - ❌ Trunk show event manager (not needed yet)
 - ❌ Multi-currency native support (not needed yet — Airwallex handles FX at the payment level)
@@ -75,9 +78,9 @@ Chosen to integrate deeply with Roéma's existing Google Workspace.
 | Email | **Gmail API** | Send from real `@roemaatelier.com` addresses |
 | Calendar | **Google Calendar API** | Fittings appear in team's existing calendars |
 | Payments | **Airwallex** | Multi-currency native, payment links, FX handling |
-| Messaging | **WhatsApp Business API** (via Twilio or 360dialog) | Two-way WA inside the ops system |
+| Messaging | _Deferred to v2 — see "Deferred" section above_ | |
 
-**Estimated monthly cost at current scale:** ~$20–40/mo on GCP + Airwallex/Twilio per-transaction fees.
+**Estimated monthly cost at current scale:** ~$20–40/mo on GCP + Airwallex per-transaction fees.
 
 ---
 
@@ -106,9 +109,10 @@ Saves ~5–10 hours of manual data entry.
 | 2 | Team feedback on wireframe → iterate | 🔄 In progress |
 | 3 | Lock feature set + add new features to wireframe | ⏳ Pending feedback |
 | 4 | Build Next.js app on GCP stack | ⏳ |
-| 5 | Integrations: Airwallex, WhatsApp, Google APIs | ⏳ |
+| 5 | Integrations: Airwallex, Google APIs (Drive, Calendar, Gmail) | ⏳ |
 | 6 | AI-assisted data import from 30 bride decks | ⏳ |
 | 7 | Team onboarding & launch | ⏳ |
+| v2 | WhatsApp two-way messaging (deferred — see above) | ⏸️ |
 
 **Estimated time to launch:** 4–8 weeks of focused build work after wireframe is locked.
 
@@ -116,9 +120,9 @@ Saves ~5–10 hours of manual data entry.
 
 ## Open items
 
-- [ ] Collect team feedback on wireframe v2
+- [x] Collect team feedback on wireframe v2 (round 1 done — incorporated)
+- [ ] Collect team feedback on wireframe v2.1 (round 2 — pending)
 - [ ] Sign up for Airwallex developer sandbox (free)
-- [ ] Sign up for WhatsApp Business API access (via Twilio or 360dialog)
 - [ ] Decide on a domain (use `roemaatelier.com` subdomain? e.g. `ops.roemaatelier.com`)
 - [ ] Decide on team roles & permissions structure (admin / designer / bride / viewer?)
 - [ ] Confirm: should designers see other designers' brides, or only their own?
@@ -140,4 +144,4 @@ roema-atelier-ops-system/
 
 ---
 
-*Last updated: 2026-05-11*
+*Last updated: 2026-05-11 — WhatsApp integration deferred to v2 after cost/complexity review.*

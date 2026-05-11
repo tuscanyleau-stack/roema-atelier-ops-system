@@ -256,100 +256,128 @@ function rMN(){
 }
 
 function rDash(){
-  const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
-  const evts={5:'amber',11:'teal',15:'coral',22:'amber',28:'blue'};
-  let cells='';
-  for(let i=0;i<4;i++) cells+='<div></div>';
-  for(let i=1;i<=31;i++){
-    const isTd=i===11;const ev=evts[i];
-    cells+=`<div style="text-align:center;padding:3px 1px;font-size:10px;border-radius:3px;${isTd?'background:var(--color-background-info);color:var(--color-text-info);font-weight:500;':''}">${i}${ev&&!isTd?`<div style="width:3px;height:3px;border-radius:50%;background:${sc[ev].tx};margin:0 auto;"></div>`:''}</div>`;
-  }
   const actColors={design:'blue',payment:'amber',alert:'red',prospect:'teal',logistics:'coral',milestone:'green'};
+
+  // Prioritized action queue — what does Roéma need to do?
+  const todayItems=[
+    {sc:'amber',ic:'ti-needle-thread',head:'Mei Lin — First toile fitting',sub:'Confirm timing & materials with Putri',meta:'2:00 PM today',cta:'Open bride'}
+  ];
+  const overdueItems=[
+    ...OVERDUES.map(o=>({sc:'red',ic:'ti-alert-triangle',head:`${o.bride}: ${o.item}`,sub:`PIC: ${o.pic} · ${o.days}d late · email auto-sent`,cta:'Email PIC'})),
+    {sc:'red',ic:'ti-credit-card',head:'Priya Sharma: 2nd payment $7,000',sub:'14 days overdue · last reminder May 5',cta:'Send Airwallex link'}
+  ];
+  const staleItems=COMMS.map(c=>({sc:'amber',ic:'ti-message-exclamation',head:`${c.bride}`,sub:`${c.last} since last contact · stage: ${c.st}`,cta:'Send WA check-in'}));
+  const totalNeedAttn=todayItems.length+overdueItems.length+staleItems.length;
+
+  const weekItems=[
+    {d:'Wed May 13',sc:'green',t:'Mei Lin — payment reminder',auto:true},
+    {d:'Fri May 15',sc:'red',t:'Priya — 2nd payment due ($7k)',auto:false},
+    {d:'Mon May 18',sc:'blue',t:'Sofia — weekly update due',auto:false},
+    {d:'Wed May 20',sc:'teal',t:'Priya — first fitting · London',auto:false},
+    {d:'Wed May 20',sc:'blue',t:'Team flight: SG → Jakarta',auto:false}
+  ];
+
+  const renderActionRow=(it)=>{
+    const c=sc[it.sc]||sc.blue;
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border-bottom:0.5px solid var(--color-border-tertiary);">
+      <div style="width:26px;height:26px;border-radius:50%;background:${c.bg};color:${c.tx};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+        <i class="ti ${it.ic}" style="font-size:13px;" aria-hidden="true"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;">${it.head}</div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:1px;">${it.sub}</div>
+      </div>
+      ${it.meta?`<span class="pill" style="background:${c.bg};color:${c.tx};white-space:nowrap;align-self:center;">${it.meta}</span>`:''}
+      <button style="font-size:10px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;white-space:nowrap;color:var(--color-text-primary);align-self:center;">${it.cta} →</button>
+    </div>`;
+  };
+
+  const groupLabel=(l,n,col)=>`<div style="font-size:9px;font-weight:600;color:${col};letter-spacing:0.08em;padding:10px 13px 4px;text-transform:uppercase;background:var(--color-background-secondary);">${l} · ${n}</div>`;
+
   return`<div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-size:15px;font-weight:500;">Dashboard</div>
-      <div style="font-size:10px;color:var(--color-text-secondary);">May 11, 2026</div>
+    <!-- Greeting -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:18px;font-weight:500;letter-spacing:-0.01em;">Good morning, Roéma</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">Mon, May 11 · ${BS.length} brides active · <strong style="color:#A32D2D;">${totalNeedAttn} things need you today</strong></div>
+      </div>
+      <button style="font-size:11px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid #B8963E;color:#B8963E;background:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:500;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
     </div>
 
-    <div style="background:#FCEBEB;border:0.5px solid #F09595;border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:500;color:#A32D2D;margin-bottom:5px;display:flex;align-items:center;gap:5px;"><i class="ti ti-alert-triangle" style="font-size:13px;" aria-hidden="true"></i> ${OVERDUES.length} overdue — email alerts auto-sent to PIC</div>
-      ${OVERDUES.map(o=>`<div style="display:flex;align-items:center;gap:7px;font-size:11px;padding:2px 0;flex-wrap:wrap;">${bdg(o.bride,o.sc)}<span style="color:var(--color-text-primary);">${o.item}</span><span style="color:#A32D2D;font-weight:500;">${o.days}d overdue</span><span style="margin-left:auto;" class="pill" style="background:#FCEBEB;color:#A32D2D;"><i class="ti ti-mail" style="font-size:9px;" aria-hidden="true"></i> emailed ${o.email}</span></div>`).join('')}
+    <!-- HERO: Needs your attention -->
+    <div style="border:0.5px solid #E0CC8A;border-radius:var(--border-radius-lg);background:linear-gradient(180deg, #FFFCF6 0%, var(--color-background-primary) 60%);margin-bottom:13px;overflow:hidden;">
+      <div style="padding:11px 13px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:7px;">
+        <i class="ti ti-flag" style="font-size:15px;color:#8A6A1F;" aria-hidden="true"></i>
+        <div style="font-size:13px;font-weight:500;">Needs your attention</div>
+        <span class="pill" style="background:#FCEBEB;color:#A32D2D;margin-left:auto;font-weight:500;">${totalNeedAttn} items</span>
+      </div>
+      ${todayItems.length?groupLabel('TODAY',todayItems.length,'#854F0B')+todayItems.map(renderActionRow).join(''):''}
+      ${overdueItems.length?groupLabel('OVERDUE',overdueItems.length,'#A32D2D')+overdueItems.map(renderActionRow).join(''):''}
+      ${staleItems.length?groupLabel('RECONNECT',staleItems.length,'#854F0B')+staleItems.map(renderActionRow).join(''):''}
     </div>
 
-    <div class="card" style="margin-bottom:10px;padding:10px 12px;">
-      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-filter" style="font-size:12px;" aria-hidden="true"></i> Pipeline funnel</div>
-      <div style="display:flex;gap:0;">
-        ${[['Prospects','3','amber','ti-brand-whatsapp'],['Brief','2','blue','ti-file-text'],['Production','2','teal','ti-needle-thread'],['Fitting','1','coral','ti-shirt'],['Delivered','0','green','ti-package']].map(([l,n,c,ic],i,arr)=>`<div style="flex:1;background:${sc[c].bg};padding:8px 6px;text-align:center;${i===0?'border-radius:var(--border-radius-md) 0 0 var(--border-radius-md);':''}${i===arr.length-1?'border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;':''}">
-          <i class="ti ${ic}" style="font-size:13px;color:${sc[c].tx};" aria-hidden="true"></i>
-          <div style="font-size:16px;font-weight:500;color:${sc[c].tx};">${n}</div>
-          <div style="font-size:9px;color:${sc[c].tx};">${l}</div>
-        </div>${i<arr.length-1?`<div style="width:1px;background:var(--color-background-primary);flex-shrink:0;"></div>`:''}`).join('')}
+    <!-- This week -->
+    <div class="card" style="padding:11px 13px;margin-bottom:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+        <div style="font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;"><i class="ti ti-calendar" style="font-size:13px;" aria-hidden="true"></i> This week</div>
+        <div style="font-size:10px;color:var(--color-text-secondary);">May 11 – 17, 2026</div>
+      </div>
+      ${weekItems.map(w=>{const c=sc[w.sc]||sc.blue;return `<div style="display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:${c.tx};flex-shrink:0;"></span>
+        <span style="color:var(--color-text-secondary);width:78px;flex-shrink:0;">${w.d}</span>
+        <span style="flex:1;">${w.t}</span>
+        ${w.auto?`<span class="pill" style="background:#EAF3DE;color:#3B6D11;font-size:9px;"><i class="ti ti-bolt" style="font-size:9px;" aria-hidden="true"></i> Auto-sends</span>`:''}
+      </div>`}).join('')}
+    </div>
+
+    <!-- At-a-glance metrics row -->
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:11px;">
+      <div class="card" style="padding:11px 13px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-filter" style="font-size:12px;" aria-hidden="true"></i> Pipeline</div>
+        <div style="display:flex;gap:0;">
+          ${[['Prospects','3','amber','ti-brand-whatsapp'],['Brief','2','blue','ti-file-text'],['Production','2','teal','ti-needle-thread'],['Fitting','1','coral','ti-shirt'],['Delivered','0','green','ti-package']].map(([l,n,c,ic],i,arr)=>`<div style="flex:1;background:${sc[c].bg};padding:8px 5px;text-align:center;${i===0?'border-radius:var(--border-radius-md) 0 0 var(--border-radius-md);':''}${i===arr.length-1?'border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;':''}">
+            <div style="font-size:16px;font-weight:500;color:${sc[c].tx};line-height:1;">${n}</div>
+            <div style="font-size:9px;color:${sc[c].tx};margin-top:3px;">${l}</div>
+          </div>${i<arr.length-1?`<div style="width:1px;background:var(--color-background-primary);flex-shrink:0;"></div>`:''}`).join('')}
+        </div>
+      </div>
+      <div class="card" style="padding:11px 13px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar" style="font-size:12px;" aria-hidden="true"></i> Financials</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:5px;">
+          <div><div style="font-size:9px;color:var(--color-text-secondary);">Collected</div><div style="font-size:17px;font-weight:500;color:#1D9E75;line-height:1;">$32.5k</div></div>
+          <div style="text-align:right;"><div style="font-size:9px;color:var(--color-text-secondary);">Outstanding</div><div style="font-size:14px;font-weight:500;color:#D85A30;line-height:1;">$29.5k</div></div>
+        </div>
+        <div style="background:var(--color-background-secondary);height:5px;border-radius:3px;overflow:hidden;margin-top:6px;"><div style="height:100%;background:#1D9E75;width:52%;"></div></div>
+        <div style="font-size:9px;color:var(--color-text-tertiary);margin-top:4px;text-align:right;">52% of $62k contracted · margin 38%</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div class="card" style="padding:10px 12px;">
-        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-calendar" style="font-size:12px;" aria-hidden="true"></i> May 2026</div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:6px;">
-          ${days.map(d=>`<div style="text-align:center;font-size:9px;color:var(--color-text-tertiary);padding:1px;">${d}</div>`).join('')}${cells}
+    <!-- Background context (smaller) -->
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-bottom:11px;">
+      <div class="card" style="padding:11px 13px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+          <div style="font-size:10px;color:var(--color-text-secondary);display:flex;align-items:center;gap:4px;"><i class="ti ti-activity" style="font-size:12px;" aria-hidden="true"></i> Recent activity</div>
+          <a href="#" style="font-size:10px;color:var(--color-text-info);text-decoration:none;">View all</a>
         </div>
-        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:6px;">
-          ${[['teal','May 11 · Mei Lin: toile fitting'],['amber','May 15 · Priya: payment due'],['blue','May 20 · Team: Jakarta trip']].map(([c,l])=>`<div style="font-size:10px;display:flex;align-items:center;gap:5px;margin-bottom:2px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc[c].tx};flex-shrink:0;display:inline-block;"></span>${l}</div>`).join('')}
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:9px;">
-        <div class="card" style="padding:10px 12px;">
-          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar" style="font-size:12px;" aria-hidden="true"></i> Revenue</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-            ${[['Contracted','$62k',''],['Collected','$32.5k','#1D9E75'],['Avg margin','38%',''],['Pipeline','$41k','#854F0B']].map(([l,v,c])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:14px;font-weight:500;${c?'color:'+c:''}">${v}</div></div>`).join('')}
-          </div>
-        </div>
-        <div class="card" style="padding:10px 12px;">
-          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:4px;"><i class="ti ti-clock" style="font-size:12px;" aria-hidden="true"></i> Payment aging</div>
-          ${[['Priya Sharma','$7,000','14d overdue','red'],['Mei Lin Tan','$5,000','Due Jun 15','amber'],['Sofia Chen','$3,500','On track','green']].map(([n,a,s,c])=>`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;border-bottom:0.5px solid var(--color-border-tertiary);">
-            <span style="flex:1;color:var(--color-text-primary);">${n}</span><span style="font-weight:500;">${a}</span><span style="color:${sc[c].tx};font-size:10px;">${s}</span>
-          </div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div class="card" style="padding:10px 12px;">
-        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-activity" style="font-size:12px;" aria-hidden="true"></i> Activity feed</div>
-        ${ACTIVITY.map(a=>{const c=actColors[a.type]||'blue';return`<div style="display:flex;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-          <div style="width:20px;height:20px;border-radius:50%;background:${sc[c].bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-            <i class="ti ${a.ic}" style="font-size:11px;color:${sc[c].tx};" aria-hidden="true"></i>
-          </div>
-          <div style="flex:1;min-width:0;"><div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.txt}</div><div style="font-size:9px;color:var(--color-text-tertiary);">${a.time}</div></div>
+        ${ACTIVITY.slice(0,4).map(a=>{const c=sc[actColors[a.type]||'blue'];return`<div style="display:flex;align-items:center;gap:7px;padding:4px 0;font-size:11px;">
+          <i class="ti ${a.ic}" style="font-size:12px;color:${c.tx};flex-shrink:0;width:14px;text-align:center;" aria-hidden="true"></i>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.txt}</span>
+          <span style="font-size:9px;color:var(--color-text-tertiary);white-space:nowrap;">${a.time}</span>
         </div>`}).join('')}
       </div>
-      <div style="display:flex;flex-direction:column;gap:9px;">
-        <div class="card" style="padding:10px 12px;">
-          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-message-exclamation" style="font-size:12px;" aria-hidden="true"></i> Communication gaps</div>
-          ${COMMS.map(c=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-            ${av(c.i,c.sc,24)}
-            <div style="flex:1;"><div style="font-size:11px;font-weight:500;">${c.bride}</div><div style="font-size:10px;color:var(--color-text-secondary);">${c.st}</div></div>
-            <span class="pill" style="background:#FCEBEB;color:#A32D2D;">${c.last} no contact</span>
-          </div>`).join('')}
-          <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:6px;"><i class="ti ti-info-circle" style="font-size:10px;" aria-hidden="true"></i> Flagged after 5 days of silence</div>
-        </div>
-        <div class="card" style="padding:10px 12px;">
-          <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-truck" style="font-size:12px;" aria-hidden="true"></i> Logistics</div>
-          ${LOGI.map(l=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-            <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;font-weight:500;">${l.bride}: ${l.item}</span></div>
-            <div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
-              <span style="font-size:10px;color:var(--color-text-secondary);">${l.courier} ${l.num}</span>
-              <span class="pill" style="background:${l.st==='delivered'?sc.green.bg:sc.amber.bg};color:${l.st==='delivered'?sc.green.tx:sc.amber.tx};">${l.st==='delivered'?'✓ Delivered':'In transit · ETA '+l.eta}</span>
-            </div>
-          </div>`).join('')}
-        </div>
+      <div class="card" style="padding:11px 13px;">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-truck" style="font-size:12px;" aria-hidden="true"></i> In transit</div>
+        ${LOGI.filter(l=>l.st!=='delivered').map(l=>`<div style="font-size:11px;padding:3px 0;"><div style="font-weight:500;">${l.bride}: ${l.item}</div><div style="font-size:10px;color:var(--color-text-secondary);margin-top:1px;">${l.courier} ${l.num} · ETA ${l.eta}</div></div>`).join('')}
+        ${LOGI.filter(l=>l.st!=='delivered').length===0?`<div style="font-size:11px;color:var(--color-text-tertiary);">All shipments delivered</div>`:''}
+        <div style="font-size:9px;color:var(--color-text-tertiary);margin-top:6px;border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;">${LOGI.filter(l=>l.st==='delivered').length} delivered this month</div>
       </div>
     </div>
 
-    <div class="card" style="padding:10px 12px;">
-      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-plane" style="font-size:12px;" aria-hidden="true"></i> Team travel</div>
+    <!-- Travel -->
+    <div class="card" style="padding:11px 13px;">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-plane" style="font-size:12px;" aria-hidden="true"></i> Upcoming team travel</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
-        ${[['May 20–22','Jakarta, ID','Priya fitting'],['Jun 8–10','Singapore','Mei Lin toile'],['Jul 15','Hong Kong','Sofia fitting']].map(([d,c,n])=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px;"><div style="font-size:9px;color:var(--color-text-secondary);">${d}</div><div style="font-size:12px;font-weight:500;">${c}</div><div style="font-size:10px;color:var(--color-text-secondary);">${n}</div></div>`).join('')}
+        ${[['May 20–22','Jakarta, ID','Priya fitting'],['Jun 8–10','Singapore','Mei Lin toile'],['Jul 15','Hong Kong','Sofia fitting']].map(([d,c,n])=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 9px;"><div style="font-size:9px;color:var(--color-text-secondary);">${d}</div><div style="font-size:12px;font-weight:500;">${c}</div><div style="font-size:10px;color:var(--color-text-secondary);">${n}</div></div>`).join('')}
       </div>
     </div>
   </div>`;}
@@ -656,18 +684,34 @@ function rBride(){
         </div>`).join('')}
       </div>`;
   } else if(bpTab==='timeline'){
-    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Step-by-step view of your gown journey.</div>`+b.tl.map(s=>`<div class="tl">
-      <div style="display:flex;flex-direction:column;align-items:center;">
-        <div class="tld" style="background:${s.done?'#1D9E75':s.cur?G:'var(--color-border-secondary)'}"></div>
-        <div style="width:1px;flex:1;min-height:16px;background:var(--color-border-tertiary);"></div>
+    const doneCount=b.tl.filter(s=>s.done).length;
+    const totalCount=b.tl.length;
+    const pct=Math.round(doneCount/totalCount*100);
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px;">Step-by-step view of your gown journey. Check marks show what's completed.</div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;margin-bottom:13px;display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-checks" style="font-size:16px;color:#1D9E75;" aria-hidden="true"></i>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:500;">${doneCount} of ${totalCount} milestones completed</div>
+        <div style="background:var(--color-background-primary);border-radius:3px;height:5px;overflow:hidden;margin-top:4px;"><div style="height:100%;background:#1D9E75;width:${pct}%;"></div></div>
       </div>
-      <div style="flex:1;padding-bottom:2px;">
+      <span style="font-size:11px;font-weight:500;color:#1D9E75;">${pct}%</span>
+    </div>`+b.tl.map((s,idx)=>{
+      const iconColor=s.done?'#1D9E75':s.cur?G:'var(--color-text-tertiary)';
+      const iconName=s.done?'ti-circle-check-filled':s.cur?'ti-circle-dot':'ti-circle';
+      const isLast=idx===b.tl.length-1;
+      return `<div class="tl">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <i class="ti ${iconName}" style="font-size:20px;color:${iconColor};flex-shrink:0;line-height:1;" aria-hidden="true"></i>
+        ${!isLast?`<div style="width:1.5px;flex:1;min-height:14px;background:${s.done?'#1D9E75':'var(--color-border-tertiary)'};margin-top:3px;"></div>`:''}
+      </div>
+      <div style="flex:1;padding-bottom:2px;padding-top:2px;">
         <div style="font-size:10px;color:var(--color-text-secondary);">${s.d}</div>
         <div style="font-size:12px;${s.done?'color:var(--color-text-secondary);text-decoration:line-through;':s.cur?'font-weight:500;':''}">${s.l}</div>
-        ${s.done?`<span style="font-size:9px;color:#1D9E75;">Completed</span>`:''}
-        ${s.cur?`<span class="pill" style="background:#FAEEDA;color:#854F0B;">We are here</span>`:''}
+        ${s.done?`<span style="font-size:9px;color:#1D9E75;display:inline-flex;align-items:center;gap:3px;margin-top:2px;"><i class="ti ti-check" style="font-size:9px;" aria-hidden="true"></i> Completed</span>`:''}
+        ${s.cur?`<span class="pill" style="background:#FAEEDA;color:#854F0B;margin-top:2px;display:inline-flex;"><i class="ti ti-arrow-narrow-right" style="font-size:10px;" aria-hidden="true"></i> We are here</span>`:''}
+        ${!s.done&&!s.cur?`<span style="font-size:9px;color:var(--color-text-tertiary);margin-top:2px;display:inline-block;">Upcoming</span>`:''}
       </div>
-    </div>`).join('');
+    </div>`}).join('');
   } else if(bpTab==='design'){
     c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Design conversation</div>`+
     b.disc.map(d=>`<div style="margin-bottom:7px;">

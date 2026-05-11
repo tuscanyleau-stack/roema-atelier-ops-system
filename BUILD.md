@@ -13,11 +13,11 @@ Detailed step-by-step build plan. Read [PLAN.md](./PLAN.md) first for context, f
 | 2 | Auth + deploy to Cloud Run | 2–3 days |
 | 3 | Google Workspace integrations (Drive, Calendar, Gmail) | 1–2 weeks |
 | 4 | Airwallex payment integration | 3–5 days |
-| 5 | WhatsApp two-way messaging | 1 week (after API approval) |
-| 6 | Data migration from bride decks | 3–5 days |
-| 7 | Polish, test, team onboarding, launch | 3–5 days |
+| 5 | Data migration from bride decks | 3–5 days |
+| 6 | Polish, test, team onboarding, launch | 3–5 days |
+| v2 | _WhatsApp two-way messaging — deferred. See PLAN.md "Deferred" section._ | _(later)_ |
 
-**Realistic total:** ~4–8 weeks of focused work. MVP usable internally by **end of week 2**.
+**Realistic total:** ~3–6 weeks of focused work (was 4–8 weeks before deferring WA). MVP usable internally by **end of week 2**.
 
 ---
 
@@ -27,13 +27,10 @@ These are the slow-to-approve / blocking items. Start them before code.
 
 ### Accounts to create
 
-- [ ] **Google Cloud account** — sign up at https://cloud.google.com/free (comes with $300 free credit for 90 days)
+- [x] **Google Cloud account** — done (project: `roema-atelier-ops-system`)
 - [ ] **Airwallex sandbox** — sign up at https://www.airwallex.com/ (developer sandbox is free; production access requires KYC)
-- [ ] **WhatsApp Business API** ⚠️ **APPROVAL TAKES 2–4 WEEKS — DO THIS FIRST**
-  - Easiest path: sign up via Twilio at https://www.twilio.com/whatsapp
-  - Alternative: 360dialog (https://www.360dialog.com)
-  - Requires: business verification documents, Facebook Business Manager account
 - [ ] **Domain decision** — confirm subdomain (e.g. `ops.roemaatelier.com`)
+- ~~WhatsApp Business API~~ — **deferred to v2** (see PLAN.md)
 
 ### Decisions to lock with team
 
@@ -178,21 +175,7 @@ Build these in any order based on what your team prioritizes.
 
 ---
 
-## Phase 5 — WhatsApp two-way (1 week — only after API approval)
-
-- [ ] Once Twilio/360dialog approval comes through, get API credentials
-- [ ] Build webhook endpoint to receive inbound WA messages
-- [ ] Logic to attach inbound messages to the right bride (match by phone number)
-- [ ] If sender is unknown → auto-create a Prospect (existing behavior)
-- [ ] Build a chat UI on the bride detail page with full message history
-- [ ] Send replies via the WA API from the chat UI
-- [ ] Tag who replied (which team member)
-
-**End-of-phase deliverable:** Full WhatsApp conversation history per bride, team can reply from inside the ops system.
-
----
-
-## Phase 6 — Data migration (3–5 days)
+## Phase 5 — Data migration (3–5 days)
 
 - [ ] You: save all 30 bride decks in one Drive folder (named consistently)
 - [ ] I (Claude) run an extraction script:
@@ -207,7 +190,7 @@ Build these in any order based on what your team prioritizes.
 
 ---
 
-## Phase 7 — Polish, test, launch (3–5 days)
+## Phase 6 — Polish, test, launch (3–5 days)
 
 - [ ] Internal QA: walk through every workflow as if you were each role (admin, designer, bride)
 - [ ] Edge cases: what if a bride has no designer assigned? What if a payment fails?
@@ -243,17 +226,18 @@ Build these in any order based on what your team prioritizes.
 
 ---
 
-## What to do TODAY to start fast
+## What to do NEXT to start fast
 
-1. **Sign up for Twilio WhatsApp** (longest approval, do first): https://www.twilio.com/whatsapp
-2. **Sign up for Google Cloud + claim $300 free credit:** https://cloud.google.com/free
-3. **Sign up for Airwallex sandbox:** https://www.airwallex.com/
-4. **Confirm your team has Workspace accounts** under `@roemaatelier.com`
-5. **Start collecting team feedback on the wireframe** (you're already doing this)
-6. **Save the 30 bride decks into one Drive folder** when convenient
+1. [x] **Sign up for Google Cloud + claim $300 free credit** — done
+2. [ ] **Sign up for Airwallex sandbox:** https://www.airwallex.com/ (fast, ~10 min)
+3. [ ] **Confirm your team has Workspace accounts** under `@roemaatelier.com`
+4. [ ] **Save the 30 bride decks into one Drive folder** when convenient (used in Phase 5)
+5. [ ] **Round 2 of team feedback** on the iterated wireframe
 
-When all 6 are done (or even 1, 2, 3 done with approvals pending), come back and we'll start **Phase 1: MVP scaffold**.
+~~Twilio WhatsApp signup~~ — **skipped** (deferred to v2)
+
+When 1–3 are done, come back and we'll start **Phase 1: MVP scaffold**.
 
 ---
 
-*Last updated: 2026-05-11*
+*Last updated: 2026-05-11 — WhatsApp phase removed; Google Cloud signup done.*
