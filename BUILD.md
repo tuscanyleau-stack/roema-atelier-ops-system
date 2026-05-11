@@ -49,19 +49,16 @@ These are the slow-to-approve / blocking items. Start them before code.
 
 ## Phase 1 — MVP scaffold (3–5 days)
 
-**Goal:** A working Next.js app on your laptop, with the wireframe ported to real React components and a real database.
+**Goal:** A working Next.js website on your laptop, with the wireframe ported to real React components and a real database.
 
-### Day 1 — Project setup
+### ✅ Day 1 — Project setup (DONE 2026-05-11)
 
-- [ ] Install Node.js (LTS version) from https://nodejs.org
-- [ ] Install [Cursor](https://cursor.sh) or VS Code as the code editor
-- [ ] Inside the `roema-atelier-ops-system` folder, scaffold the Next.js app:
-  ```
-  npx create-next-app@latest web --typescript --tailwind --app --eslint
-  ```
-  → All prompts: TypeScript Yes, ESLint Yes, Tailwind Yes, App Router Yes
-- [ ] Move into `web/` folder and start the dev server: `npm run dev`
-- [ ] Confirm you can see the Next.js welcome page at http://localhost:3000
+- [x] Installed Node.js v24.15.0
+- [x] Installed Cursor
+- [x] Scaffolded Next.js 16 in `/web` subfolder (TypeScript + Tailwind + App Router + Turbopack)
+- [x] Dev server runs on `localhost:3000`
+- [x] Replaced default Next.js welcome page with Roéma-branded splash (Fraunces + Montserrat)
+- [x] Confirmed hot reload works
 
 ### Day 2–3 — Database schema + Cloud SQL
 

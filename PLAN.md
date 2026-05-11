@@ -105,10 +105,10 @@ Saves ~5–10 hours of manual data entry.
 
 | Phase | What | Status |
 |---|---|---|
-| 1 | Wireframe v2 (HTML prototype) | ✅ Done — live at https://tuscanyleau-stack.github.io/roema-atelier-ops-system/ |
-| 2 | Team feedback on wireframe → iterate | 🔄 In progress |
-| 3 | Lock feature set + add new features to wireframe | ⏳ Pending feedback |
-| 4 | Build Next.js app on GCP stack | ⏳ |
+| 1 | Wireframe v1 (HTML prototype) | ✅ Done — live at https://tuscanyleau-stack.github.io/roema-atelier-ops-system/ |
+| 2 | Team feedback on wireframe → iterate | ✅ Done (rounds 1 + 2 incorporated; wireframe v1 locked 2026-05-11) |
+| 3 | Lock feature set | ✅ Done (see Confirmed feature set above) |
+| 4 | Build Next.js app on GCP stack | 🔄 **Starting now** |
 | 5 | Integrations: Airwallex, Google APIs (Drive, Calendar, Gmail) | ⏳ |
 | 6 | AI-assisted data import from 30 bride decks | ⏳ |
 | 7 | Team onboarding & launch | ⏳ |
@@ -123,7 +123,7 @@ Saves ~5–10 hours of manual data entry.
 - [x] Collect team feedback on wireframe v2 (round 1 done — incorporated)
 - [ ] Collect team feedback on wireframe v2.1 (round 2 — pending)
 - [ ] Sign up for Airwallex developer sandbox (free)
-- [ ] Decide on a domain (use `roemaatelier.com` subdomain? e.g. `ops.roemaatelier.com`)
+- [x] Decide on a domain — **`portal.roemaatelier.com`** (decided 2026-05-11)
 - [ ] Decide on team roles & permissions structure (admin / designer / bride / viewer?)
 - [ ] Confirm: should designers see other designers' brides, or only their own?
 
