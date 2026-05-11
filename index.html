@@ -4,52 +4,87 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roéma Atelier — CRM v2 Wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.30.0/dist/tabler-icons.min.css">
 <style>
 :root {
+  /* Refined neutral palette — warm whites, sophisticated grays */
   --color-background-primary: #ffffff;
-  --color-background-secondary: #f7f5f2;
-  --color-background-tertiary: #efeae3;
-  --color-background-info: #e8f0fa;
-  --color-text-primary: #2d2a26;
-  --color-text-secondary: #706b62;
-  --color-text-tertiary: #a09a8e;
-  --color-text-info: #185fa5;
-  --color-border-secondary: #d4cec3;
-  --color-border-tertiary: #e8e3da;
-  --border-radius-md: 6px;
-  --border-radius-lg: 10px;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-background-secondary: #f5f4f1;
+  --color-background-tertiary: #edebe7;
+  --color-background-info: #eaf2fc;
+  --color-background-page: #f9f8f5;
+  --color-text-primary: #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-text-tertiary: #98979c;
+  --color-text-info: #0066cc;
+  --color-border-secondary: rgba(0,0,0,0.10);
+  --color-border-tertiary: rgba(0,0,0,0.06);
+  --color-accent: #B8963E;
+  --color-accent-soft: #fbf6e8;
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 14px;
+  --border-radius-xl: 18px;
+  /* Roéma brand fonts: Fraunces (serif display) + Montserrat (body) */
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces", "Times New Roman", -apple-system, BlinkMacSystemFont, serif;
+  --shadow-xs: 0 1px 2px rgba(16,16,18,0.04);
+  --shadow-sm: 0 1px 2px rgba(16,16,18,0.04), 0 1px 3px rgba(16,16,18,0.03);
+  --shadow-md: 0 1px 3px rgba(16,16,18,0.05), 0 8px 24px rgba(16,16,18,0.04);
+  --shadow-lg: 0 4px 12px rgba(16,16,18,0.06), 0 24px 48px rgba(16,16,18,0.05);
+  /* Apple-style easings */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration: 260ms;
+  --duration-slow: 520ms;
 }
 * { box-sizing: border-box; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 100px; }
+*::-webkit-scrollbar-track { background: transparent; }
 body {
   margin: 0;
-  background: #faf8f5;
+  background:
+    radial-gradient(at 12% 0%, rgba(184,150,62,0.04) 0%, transparent 50%),
+    radial-gradient(at 100% 12%, rgba(0,102,204,0.025) 0%, transparent 50%),
+    var(--color-background-page);
+  min-height: 100vh;
   font-family: var(--font-sans);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
-  padding: 24px;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01", "ss03";
+  letter-spacing: -0.003em;
+  padding: 28px 24px 60px;
 }
 .wrapper {
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
   background: var(--color-background-primary);
-  border-radius: var(--border-radius-lg);
-  padding: 18px 22px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  border-radius: var(--border-radius-xl);
+  padding: 22px 26px 26px;
+  box-shadow: var(--shadow-md);
+  border: 0.5px solid rgba(0,0,0,0.04);
 }
 .banner {
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto 14px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--color-text-secondary);
-  background: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-tertiary);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(0,0,0,0.05);
   border-radius: var(--border-radius-md);
-  padding: 8px 12px;
+  padding: 10px 14px;
   display: flex;
-  gap: 8px;
+  gap: 9px;
   align-items: center;
+  box-shadow: var(--shadow-xs);
 }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -57,32 +92,115 @@ body {
 }
 input[type="text"], input[type="email"], textarea {
   font-family: var(--font-sans);
-  padding: 5px 8px;
+  padding: 7px 10px;
   border-radius: var(--border-radius-md);
   border: 0.5px solid var(--color-border-secondary);
   background: var(--color-background-primary);
   color: var(--color-text-primary);
+  font-size: 12px;
+  transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+  outline: none;
 }
-.ni{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:background .1s;}
-.ni:hover{background:var(--color-background-tertiary);color:var(--color-text-primary);}
-.ni.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border-right:2px solid #B8963E;}
-.tb{padding:4px 11px;font-size:11px;border-radius:var(--border-radius-md);background:none;border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);}
-.tb.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500;border-color:var(--color-border-secondary);}
-.vb{padding:5px 13px;font-size:12px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:none;color:var(--color-text-secondary);}
-.vb.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500;}
-.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px 13px;}
-.br{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;}
-.br:hover{background:var(--color-background-secondary);padding:8px 7px;margin:0 -7px;}
-.tl{display:flex;gap:9px;margin-bottom:12px;}
-.tld{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-cell{aspect-ratio:1.1;border:0.5px solid var(--color-border-tertiary);border-radius:4px;padding:4px;font-size:10px;color:var(--color-text-primary);position:relative;background:var(--color-background-primary);}
-.cal-cell.empty{border:none;background:transparent;}
-.cal-cell.today{background:var(--color-background-info);border-color:#185fa5;color:var(--color-text-info);font-weight:500;}
-.cal-cell .ev{font-size:8.5px;line-height:1.2;margin-top:2px;padding:1px 3px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.cal-head{text-align:center;font-size:9px;color:var(--color-text-tertiary);padding:3px 0;text-transform:uppercase;letter-spacing:0.04em;}
+input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(184,150,62,0.12);
+}
+button { font-family: var(--font-sans); transition: all var(--duration) var(--ease); cursor: pointer; }
+button:active { transform: scale(0.97); }
+a { transition: color var(--duration) var(--ease); }
+.ni{display:flex;align-items:center;gap:9px;padding:8px 14px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:background var(--duration) var(--ease), color var(--duration) var(--ease);border-radius:8px;margin:1px 7px;}
+.ni:hover{background:rgba(0,0,0,0.04);color:var(--color-text-primary);}
+.ni.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;box-shadow:var(--shadow-xs);border:0.5px solid rgba(184,150,62,0.4);margin:1px 7px;}
+.tb{padding:5px 12px;font-size:11.5px;border-radius:8px;background:transparent;border:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;transition:all var(--duration) var(--ease);}
+.tb:hover{background:rgba(0,0,0,0.04);color:var(--color-text-primary);}
+.tb.active{background:var(--color-background-primary);color:var(--color-text-primary);box-shadow:var(--shadow-xs);border:0.5px solid var(--color-border-tertiary);}
+.vb{padding:6px 14px;font-size:12px;border-radius:9px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--color-text-secondary);font-weight:500;transition:all var(--duration) var(--ease);}
+.vb:hover{background:var(--color-background-primary);color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.vb.active{background:var(--color-background-primary);color:var(--color-text-primary);box-shadow:var(--shadow-xs);border-color:rgba(184,150,62,0.4);}
+.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;transition:background var(--duration) var(--ease);}
+.card{background:var(--color-background-primary);border:none;border-radius:var(--border-radius-lg);padding:13px 15px;box-shadow:var(--shadow-sm);transition:box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);}
+.card.glass{background:rgba(255,255,255,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.br{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;border-radius:10px;transition:background var(--duration) var(--ease);margin:0 -12px;}
+.br:last-child{border-bottom:none;}
+.br:hover{background:var(--color-background-secondary);}
+.tl{display:flex;gap:11px;margin-bottom:14px;}
+.tld{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;letter-spacing:0.005em;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-cell{aspect-ratio:1.05;border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:5px;font-size:10px;color:var(--color-text-primary);position:relative;background:var(--color-background-primary);transition:all var(--duration) var(--ease);}
+.cal-cell:hover:not(.empty){background:var(--color-background-secondary);transform:translateY(-1px);box-shadow:var(--shadow-xs);}
+.cal-cell.empty{border:none;background:transparent;cursor:default;}
+.cal-cell.empty:hover{transform:none;box-shadow:none;}
+.cal-cell.today{background:linear-gradient(135deg, #eaf2fc 0%, #fff7e3 100%);border-color:rgba(0,102,204,0.18);color:var(--color-text-info);font-weight:600;}
+.cal-cell .ev{font-size:8.5px;line-height:1.2;margin-top:2px;padding:1.5px 4px;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.cal-head{text-align:center;font-size:9px;color:var(--color-text-tertiary);padding:3px 0;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+.mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.mini-cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;border-radius:6px;color:var(--color-text-primary);position:relative;font-weight:400;}
+.mini-cal-day.empty{color:transparent;pointer-events:none;}
+.mini-cal-day.today{background:var(--color-accent);color:#fff;font-weight:600;}
+.mini-cal-day .dot{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;}
+.mini-cal-head{text-align:center;font-size:8.5px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;padding:2px 0 4px;}
+/* Display typography — Fraunces serif for headings */
+.h1, .display-serif{font-family:var(--font-display);font-size:22px;font-weight:500;letter-spacing:-0.02em;line-height:1.12;font-variation-settings:"opsz" 80, "SOFT" 30;}
+.h2{font-family:var(--font-display);font-size:16px;font-weight:500;letter-spacing:-0.012em;font-variation-settings:"opsz" 24, "SOFT" 30;}
+.label-up{font-family:var(--font-sans);font-size:9.5px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+.btn-primary{font-family:var(--font-sans);font-size:11.5px;padding:7px 13px;border-radius:9px;border:none;background:var(--color-accent);color:#fff;cursor:pointer;font-weight:500;box-shadow:var(--shadow-xs);transition:all var(--duration) var(--ease);}
+.btn-primary:hover{background:#a98735;box-shadow:var(--shadow-sm);}
+.btn-ghost{font-family:var(--font-sans);font-size:11px;padding:6px 12px;border-radius:9px;border:0.5px solid var(--color-border-tertiary);background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--color-text-primary);cursor:pointer;font-weight:500;transition:all var(--duration) var(--ease);}
+.btn-ghost:hover{background:var(--color-background-primary);border-color:var(--color-border-secondary);box-shadow:var(--shadow-xs);}
+.btn-accent-outline{font-family:var(--font-sans);font-size:11.5px;padding:7px 13px;border-radius:9px;border:0.5px solid var(--color-accent);background:transparent;color:var(--color-accent);cursor:pointer;font-weight:500;transition:all var(--duration) var(--ease);display:inline-flex;align-items:center;gap:5px;}
+.btn-accent-outline:hover{background:var(--color-accent-soft);}
+
+/* Sticky frosted-glass portal bar */
+.portal-bar{
+  position:sticky;
+  top:8px;
+  z-index:50;
+  background:rgba(255,255,255,0.72);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  backdrop-filter:saturate(180%) blur(24px);
+  border-radius:14px;
+  border:0.5px solid rgba(0,0,0,0.05);
+  padding:10px 14px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-bottom:14px;
+  box-shadow:var(--shadow-xs);
+  transition:box-shadow var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+.portal-bar.scrolled{
+  background:rgba(255,255,255,0.86);
+  box-shadow:var(--shadow-sm);
+}
+
+/* Scroll-reveal animations */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 720ms var(--ease-out), transform 720ms var(--ease-out);}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* Content fade-in on portal/tab switch */
+@keyframes contentReveal{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+#mn > *, #sb > *{animation:contentReveal 380ms var(--ease-out);}
+
+/* Subtle card hover lift */
+.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
+
+/* Refined select dropdown */
+select{
+  font-family:var(--font-sans);
+  appearance:none;-webkit-appearance:none;
+  background:var(--color-background-primary) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path fill="none" stroke="%236e6e73" stroke-width="1.5" d="M1 1l4 4 4-4"/></svg>') no-repeat right 9px center;
+  padding-right:24px;
+  border:0.5px solid var(--color-border-secondary);
+  border-radius:9px;
+  font-size:12px;
+  color:var(--color-text-primary);
+  transition:border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+select:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(184,150,62,0.12);}
 </style>
 </head>
 <body>
@@ -96,19 +214,20 @@ input[type="text"], input[type="email"], textarea {
 <div class="wrapper">
 <h2 class="sr-only">Roéma Atelier CRM v2 — Full system with prospects, automations, risk alerts, activity feed, logistics, three-portal access, RCL tiers, designer payouts, file uploads, and monthly calendar.</h2>
 
-<div id="app" style="font-family:var(--font-sans);padding-top:4px;">
-<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
-  <span style="font-size:11px;color:var(--color-text-tertiary);margin-right:2px;">Portal:</span>
+<div id="app" style="font-family:var(--font-sans);">
+<div class="portal-bar" id="portalBar">
+  <span class="display-serif" style="font-size:13px;letter-spacing:-0.01em;color:var(--color-text-primary);margin-right:4px;">Roéma <span style="color:var(--color-text-tertiary);font-style:italic;font-weight:400;">Atelier</span></span>
+  <span style="width:1px;height:14px;background:var(--color-border-tertiary);margin:0 6px;"></span>
   <button class="vb active" id="vbtn-roema" onclick="sv('roema')"><i class="ti ti-crown" style="font-size:11px;" aria-hidden="true"></i> Roéma</button>
   <button class="vb" id="vbtn-designer" onclick="sv('designer')"><i class="ti ti-needle-thread" style="font-size:11px;" aria-hidden="true"></i> Designer</button>
   <button class="vb" id="vbtn-bride" onclick="sv('bride')"><i class="ti ti-diamond" style="font-size:11px;" aria-hidden="true"></i> Bride</button>
-  <span style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px;color:#0F6E56;background:#E1F5EE;padding:2px 8px;border-radius:8px;">
+  <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:#0F6E56;background:#E1F5EE;padding:3px 9px;border-radius:100px;font-weight:500;">
     <i class="ti ti-bolt" style="font-size:11px;" aria-hidden="true"></i> 5 automations active
   </span>
 </div>
-<div style="display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;min-height:520px;">
+<div style="display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;min-height:520px;background:var(--color-background-primary);box-shadow:var(--shadow-sm);">
   <div id="sb"></div>
-  <div id="mn" style="flex:1;padding:16px;overflow:auto;min-width:0;"></div>
+  <div id="mn" style="flex:1;padding:18px 20px;overflow:auto;min-width:0;"></div>
 </div>
 </div>
 
@@ -296,12 +415,12 @@ function rDash(){
 
   return`<div>
     <!-- Greeting -->
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
       <div>
-        <div style="font-size:18px;font-weight:500;letter-spacing:-0.01em;">Good morning, Roéma</div>
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">Mon, May 11 · ${BS.length} brides active · <strong style="color:#A32D2D;">${totalNeedAttn} things need you today</strong></div>
+        <div class="display-serif" style="font-size:26px;font-weight:400;letter-spacing:-0.02em;line-height:1.1;">Good morning, <em style="font-weight:500;">Roéma</em></div>
+        <div style="font-size:11.5px;color:var(--color-text-secondary);margin-top:5px;">Mon, May 11 · ${BS.length} brides active · <strong style="color:#A32D2D;font-weight:600;">${totalNeedAttn} things need you today</strong></div>
       </div>
-      <button style="font-size:11px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid #B8963E;color:#B8963E;background:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:500;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
+      <button class="btn-accent-outline"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
     </div>
 
     <!-- HERO: Needs your attention -->
@@ -316,18 +435,52 @@ function rDash(){
       ${staleItems.length?groupLabel('RECONNECT',staleItems.length,'#854F0B')+staleItems.map(renderActionRow).join(''):''}
     </div>
 
-    <!-- This week -->
-    <div class="card" style="padding:11px 13px;margin-bottom:11px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
-        <div style="font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;"><i class="ti ti-calendar" style="font-size:13px;" aria-hidden="true"></i> This week</div>
-        <div style="font-size:10px;color:var(--color-text-secondary);">May 11 – 17, 2026</div>
+    <!-- This week + mini calendar -->
+    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:11px;margin-bottom:11px;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-week" style="font-size:14px;color:var(--color-accent);" aria-hidden="true"></i> This week</div>
+          <div class="label-up">May 11 – 17</div>
+        </div>
+        ${weekItems.map((w,i)=>{const c=sc[w.sc]||sc.blue;return `<div style="display:flex;align-items:center;gap:11px;padding:7px 0;${i<weekItems.length-1?'border-bottom:0.5px solid var(--color-border-tertiary);':''}font-size:11.5px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:${c.tx};flex-shrink:0;box-shadow:0 0 0 3px ${c.bg};"></span>
+          <span style="color:var(--color-text-secondary);width:84px;flex-shrink:0;font-size:11px;letter-spacing:-0.005em;">${w.d}</span>
+          <span style="flex:1;color:var(--color-text-primary);">${w.t}</span>
+          ${w.auto?`<span class="pill" style="background:#eaf3de;color:#3b6d11;"><i class="ti ti-bolt" style="font-size:9px;" aria-hidden="true"></i> Auto</span>`:''}
+        </div>`}).join('')}
       </div>
-      ${weekItems.map(w=>{const c=sc[w.sc]||sc.blue;return `<div style="display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;">
-        <span style="width:8px;height:8px;border-radius:50%;background:${c.tx};flex-shrink:0;"></span>
-        <span style="color:var(--color-text-secondary);width:78px;flex-shrink:0;">${w.d}</span>
-        <span style="flex:1;">${w.t}</span>
-        ${w.auto?`<span class="pill" style="background:#EAF3DE;color:#3B6D11;font-size:9px;"><i class="ti ti-bolt" style="font-size:9px;" aria-hidden="true"></i> Auto-sends</span>`:''}
-      </div>`}).join('')}
+
+      <!-- Mini calendar -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar" style="font-size:13px;color:var(--color-accent);" aria-hidden="true"></i> May 2026</div>
+          <div style="display:flex;gap:2px;">
+            <button style="border:none;background:transparent;color:var(--color-text-tertiary);padding:3px 6px;font-size:13px;line-height:1;border-radius:6px;">‹</button>
+            <button style="border:none;background:transparent;color:var(--color-text-tertiary);padding:3px 6px;font-size:13px;line-height:1;border-radius:6px;">›</button>
+          </div>
+        </div>
+        <div class="mini-cal">
+          ${['M','T','W','T','F','S','S'].map(d=>`<div class="mini-cal-head">${d}</div>`).join('')}
+          ${(()=>{
+            const dots={11:'amber',13:'green',15:'red',17:'blue',20:'teal',22:'teal'};
+            const fdow=4;
+            let cells='';
+            for(let i=0;i<fdow;i++) cells+='<div class="mini-cal-day empty"></div>';
+            for(let d=1;d<=31;d++){
+              const isToday=d===11;
+              const dot=dots[d];
+              cells+=`<div class="mini-cal-day ${isToday?'today':''}">${d}${dot&&!isToday?`<span class="dot" style="background:${sc[dot].tx};"></span>`:''}</div>`;
+            }
+            return cells;
+          })()}
+        </div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:11px;padding-top:9px;border-top:0.5px solid var(--color-border-tertiary);display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;">
+          <div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc.amber.tx};flex-shrink:0;"></span>Fitting</div>
+          <div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc.red.tx};flex-shrink:0;"></span>Payment</div>
+          <div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc.green.tx};flex-shrink:0;"></span>Automation</div>
+          <div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:${sc.teal.tx};flex-shrink:0;"></span>Travel</div>
+        </div>
+      </div>
     </div>
 
     <!-- At-a-glance metrics row -->
@@ -387,7 +540,7 @@ function rPros(){
   return`<div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div>
-        <div style="font-size:15px;font-weight:500;">Prospects</div>
+        <div class="display-serif" style="font-size:22px;font-weight:500;letter-spacing:-0.02em;">Prospects</div>
         <div style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:4px;"><i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;" aria-hidden="true"></i> Auto-captured from WhatsApp Business</div>
       </div>
       <span class="pill" style="background:#E1F5EE;color:#0F6E56;font-size:10px;"><i class="ti ti-bolt" style="font-size:10px;" aria-hidden="true"></i> AI extraction active</span>
@@ -421,7 +574,7 @@ function rPros(){
 function rBL(){
   return`<div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div style="font-size:15px;font-weight:500;">Brides</div>
+      <div class="display-serif" style="font-size:22px;font-weight:500;letter-spacing:-0.02em;">Brides</div>
       <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:11px;font-size:10px;color:var(--color-text-tertiary);align-items:center;">
@@ -580,7 +733,7 @@ function rBD(){
 
 function rBooks(){
   return`<div>
-    <div style="font-size:15px;font-weight:500;margin-bottom:11px;">Books</div>
+    <div class="display-serif" style="font-size:22px;font-weight:500;letter-spacing:-0.02em;margin-bottom:14px;">Books</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px;">
       ${[['Contracted','$62,000',''],['Collected','$32,500','#1D9E75'],['Avg margin','38%','']].map(([l,v,c])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:17px;font-weight:500;${c?'color:'+c:''}">${v}</div></div>`).join('')}
     </div>
@@ -600,7 +753,7 @@ function rBooks(){
 
 function rTeam(){
   return`<div>
-    <div style="font-size:15px;font-weight:500;margin-bottom:11px;">Team & settings</div>
+    <div class="display-serif" style="font-size:22px;font-weight:500;letter-spacing:-0.02em;margin-bottom:14px;">Team & settings</div>
     <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:9px;">
       <div style="font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 12px;">Members</div>
       ${[{n:'You (Admin)',e:'hi@roemaatelier.com',r:'Roéma admin',i:'RA',c:'amber'},{n:'Putri Rahayu',e:'putri@designer.id',r:'Designer',i:'PR',c:'teal'}].map(m=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-top:0.5px solid var(--color-border-tertiary);">${av(m.i,m.c)}<div style="flex:1;"><div style="font-size:12px;font-weight:500;">${m.n}</div><div style="font-size:10px;color:var(--color-text-secondary);">${m.e}</div></div><span style="font-size:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);padding:2px 7px;border-radius:8px;">${m.r}</span>${m.r!=='Roéma admin'?`<button style="font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;color:#A32D2D;">Remove</button>`:''}</div>`).join('')}
@@ -624,7 +777,7 @@ function rTeam(){
       <div style="display:flex;gap:6px;">
         <input type="email" placeholder="Email address" style="flex:1;font-size:12px;">
         <select style="font-size:12px;padding:5px 7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
-          <option>Roéma admin</option><option>Designer</option>
+          <option>Roéma admin</option><option>Designer</option><option>Bride</option>
         </select>
         <button style="font-size:12px;padding:5px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;">Invite</button>
       </div>
@@ -634,9 +787,9 @@ function rTeam(){
 function rDes(){
   const ms=designerMilestones().filter(m=>m.month===calMonth);
   return`<div>
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
-      <div><div style="font-size:15px;font-weight:500;">Good morning, Putri</div><div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier · Designer portal</div></div>
-      <span class="pill" style="background:#FCEBEB;color:#A32D2D;"><i class="ti ti-mail" style="font-size:10px;" aria-hidden="true"></i> 2 alert emails received</span>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;">
+      <div><div class="display-serif" style="font-size:24px;font-weight:400;letter-spacing:-0.02em;">Good morning, <em style="font-weight:500;">Putri</em></div><div style="font-size:11.5px;color:var(--color-text-secondary);margin-top:4px;">Roéma Atelier · Designer portal</div></div>
+      <span class="pill" style="background:#FCEBEB;color:#A32D2D;align-self:center;"><i class="ti ti-mail" style="font-size:10px;" aria-hidden="true"></i> 2 alert emails received</span>
     </div>
     <div style="background:#FCEBEB;border:0.5px solid #F09595;border-radius:var(--border-radius-md);padding:9px 12px;margin-bottom:10px;">
       <div style="font-size:11px;font-weight:500;color:#A32D2D;margin-bottom:4px;"><i class="ti ti-alert-triangle" style="font-size:12px;" aria-hidden="true"></i> 2 items need your attention</div>
@@ -743,12 +896,12 @@ function rBride(){
     </div>`;
   }
   return`<div>
-    <div style="border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:10px;margin-bottom:11px;">
-      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-        <div style="font-size:15px;font-weight:500;">Hello, Mei Lin</div>
+    <div style="padding-bottom:14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+        <div class="display-serif" style="font-size:24px;font-weight:400;letter-spacing:-0.02em;">Hello, <em style="font-weight:500;">Mei Lin</em></div>
         ${tierBadge(b.tier)}
       </div>
-      <div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier bride portal · ${b.wd}</div>
+      <div style="font-size:11.5px;color:var(--color-text-secondary);margin-top:4px;">Your Roéma Atelier bride portal · ${b.wd}</div>
     </div>
     <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:8px 11px;margin-bottom:11px;display:flex;align-items:center;gap:7px;">
       <div style="width:6px;height:6px;border-radius:50%;background:${G};flex-shrink:0;"></div>
@@ -765,6 +918,12 @@ function sbt(t){btab=t;rMN();}
 function sbpt(t){bpTab=t;rMN();}
 function render(){rSB();rMN();}
 render();
+
+// Frosted-glass header shadow on scroll
+window.addEventListener('scroll', () => {
+  const bar = document.getElementById('portalBar');
+  if (bar) bar.classList.toggle('scrolled', window.scrollY > 12);
+}, { passive: true });
 </script>
 
 </div>
