@@ -77,6 +77,12 @@ input[type="text"], input[type="email"], textarea {
 .tl{display:flex;gap:9px;margin-bottom:12px;}
 .tld{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-cell{aspect-ratio:1.1;border:0.5px solid var(--color-border-tertiary);border-radius:4px;padding:4px;font-size:10px;color:var(--color-text-primary);position:relative;background:var(--color-background-primary);}
+.cal-cell.empty{border:none;background:transparent;}
+.cal-cell.today{background:var(--color-background-info);border-color:#185fa5;color:var(--color-text-info);font-weight:500;}
+.cal-cell .ev{font-size:8.5px;line-height:1.2;margin-top:2px;padding:1px 3px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-head{text-align:center;font-size:9px;color:var(--color-text-tertiary);padding:3px 0;text-transform:uppercase;letter-spacing:0.04em;}
 </style>
 </head>
 <body>
@@ -88,7 +94,7 @@ input[type="text"], input[type="email"], textarea {
 </div>
 
 <div class="wrapper">
-<h2 class="sr-only">Roéma Atelier CRM v2 — Full system with prospects, automations, risk alerts, activity feed, logistics, and three-portal access.</h2>
+<h2 class="sr-only">Roéma Atelier CRM v2 — Full system with prospects, automations, risk alerts, activity feed, logistics, three-portal access, RCL tiers, designer payouts, file uploads, and monthly calendar.</h2>
 
 <div id="app" style="font-family:var(--font-sans);padding-top:4px;">
 <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
@@ -107,26 +113,33 @@ input[type="text"], input[type="email"], textarea {
 </div>
 
 <script>
-let vw='roema',rnav='dashboard',btab='brief',bpTab='timeline',selB=null;
+let vw='roema',rnav='dashboard',btab='brief',bpTab='calendar',selB=null,calMonth=4; // 4 = May (0-indexed)
 const G='#B8963E';
-const sc={amber:{bg:'#FAEEDA',tx:'#854F0B'},teal:{bg:'#E1F5EE',tx:'#0F6E56'},blue:{bg:'#E6F1FB',tx:'#185FA5'},coral:{bg:'#FAECE7',tx:'#993C1D'},green:{bg:'#EAF3DE',tx:'#3B6D11'},red:{bg:'#FCEBEB',tx:'#A32D2D'}};
+const sc={amber:{bg:'#FAEEDA',tx:'#854F0B'},teal:{bg:'#E1F5EE',tx:'#0F6E56'},blue:{bg:'#E6F1FB',tx:'#185FA5'},coral:{bg:'#FAECE7',tx:'#993C1D'},green:{bg:'#EAF3DE',tx:'#3B6D11'},red:{bg:'#FCEBEB',tx:'#A32D2D'},purple:{bg:'#F3E8FF',tx:'#6B46C1'}};
+const tierStyles={'RCL':{bg:'#FFF4DC',tx:'#8A6A1F',label:'★ RCL',title:'Roéma Complete Lead — premium service tier'},'non-RCL':{bg:'#f0ede8',tx:'#706b62',label:'Standard',title:'Non-RCL — standard service'},'sponsored':{bg:'#F3E8FF',tx:'#6B46C1',label:'Sponsored',title:'Sponsored bride'}};
 
 const BS=[
-  {id:1,n:'Mei Lin Tan',i:'MT',loc:'Singapore',st:'Design review',sc:'amber',des:'Putri Rahayu',wd:'Aug 15, 2025',pp:75,pd:15000,tot:20000,mg:35,
+  {id:1,n:'Mei Lin Tan',i:'MT',loc:'Singapore',st:'Design review',sc:'amber',tier:'RCL',des:'Putri Rahayu',desShare:0.6,desPaid:9000,wd:'Aug 15, 2026',pp:75,pd:15000,tot:20000,mg:35,quote:'SGD 20,000',
    brief:'Modern romantic silhouette with floral lace appliqué. Prefers ivory over pure white. Comfortable fit for 12-hour reception.',
    kyc:'CEO of a tech startup. Very detail-oriented. Father Henry approves all decisions before bride signs off.',gk:'Henry Tan (Father)',
    tl:[{d:'Mar 1',l:'Kickoff brief',done:1},{d:'Mar 20',l:'Design concept',done:1},{d:'Apr 10',l:'Revision #1',done:1},{d:'May 11',l:'First toile fitting',cur:1},{d:'Jun 15',l:'Fabric sign-off'},{d:'Jul 10',l:'Final fitting'},{d:'Aug 1',l:'Gown delivery'}],
-   disc:[{d:'Apr 28',f:'Putri',t:'Revised sketch sent — deeper V-neckline per your request.'},{d:'Apr 29',f:'Roéma',t:'Client approved V-neckline. Confirming button closure at back.'},{d:'May 2',f:'Bride',t:'Prefer zip closure — easier to put on alone.'}]},
-  {id:2,n:'Priya Sharma',i:'PS',loc:'London, UK',st:'Fitting stage',sc:'teal',des:'Putri Rahayu',wd:'Sep 22, 2025',pp:50,pd:14000,tot:28000,mg:42,
+   disc:[{d:'Apr 28',f:'Putri',t:'Revised sketch sent — deeper V-neckline per your request.'},{d:'Apr 29',f:'Roéma',t:'Client approved V-neckline. Confirming button closure at back.'},{d:'May 2',f:'Bride',t:'Prefer zip closure — easier to put on alone.'}],
+   files:[{n:'Bride brief deck.pdf',t:'pdf',sz:'2.4 MB',d:'Mar 1'},{n:'Mood board.pdf',t:'pdf',sz:'5.1 MB',d:'Mar 3'},{n:'Sketch v3.png',t:'img',sz:'1.2 MB',d:'Apr 8'},{n:'Fabric swatch — ivory lace.jpg',t:'img',sz:'820 KB',d:'Apr 25'}],
+   payouts:[{d:'Mar 5',amt:3000,note:'Kickoff retainer'},{d:'Apr 12',amt:3000,note:'Design approval milestone'},{d:'May 1',amt:3000,note:'Toile production'}]},
+  {id:2,n:'Priya Sharma',i:'PS',loc:'London, UK',st:'Fitting stage',sc:'teal',tier:'non-RCL',des:'Putri Rahayu',desShare:0.65,desPaid:12000,wd:'Sep 22, 2026',pp:50,pd:14000,tot:28000,mg:42,quote:'GBP 28,000',
    brief:'Indo-Western fusion with gold zardosi embroidery. Colorway: blush + gold.',
    kyc:'NRI bride, London. Mother Anita is very involved. Keep bridalwear aesthetic for in-laws.',gk:'Mrs. Anita Sharma (Mother)',
    tl:[{d:'Feb 10',l:'Kickoff brief',done:1},{d:'Feb 28',l:'Mood board',done:1},{d:'Mar 22',l:'Design sign-off',done:1},{d:'Apr 18',l:'Embroidery approval',done:1},{d:'May 20',l:'First fitting (London)',cur:1},{d:'Jul 5',l:'Final fitting'},{d:'Sep 10',l:'Delivery'}],
-   disc:[{d:'May 1',f:'Putri',t:'Embroidery sample sent via DHL. ETA May 12.'},{d:'May 3',f:'Bride',t:'Received! Gold thread is perfect — can we increase density on bodice?'},{d:'May 8',f:'Roéma',t:'Confirming with Putri — she will respond by May 10.'}]},
-  {id:3,n:'Sofia Chen',i:'SC',loc:'Hong Kong',st:'Brief confirmed',sc:'blue',des:'Putri Rahayu',wd:'Nov 10, 2025',pp:25,pd:3500,tot:14000,mg:38,
+   disc:[{d:'May 1',f:'Putri',t:'Embroidery sample sent via DHL. ETA May 12.'},{d:'May 3',f:'Bride',t:'Received! Gold thread is perfect — can we increase density on bodice?'},{d:'May 8',f:'Roéma',t:'Confirming with Putri — she will respond by May 10.'}],
+   files:[{n:'Initial brief — Priya.pdf',t:'pdf',sz:'1.8 MB',d:'Feb 10'},{n:'Mood board — blush+gold.pdf',t:'pdf',sz:'4.3 MB',d:'Feb 28'},{n:'Embroidery sample.jpg',t:'img',sz:'2.1 MB',d:'May 1'}],
+   payouts:[{d:'Feb 15',amt:4000,note:'Kickoff'},{d:'Mar 25',amt:4000,note:'Design sign-off'},{d:'Apr 22',amt:4000,note:'Embroidery approval'}]},
+  {id:3,n:'Sofia Chen',i:'SC',loc:'Hong Kong',st:'Brief confirmed',sc:'blue',tier:'sponsored',des:'Putri Rahayu',desShare:0.5,desPaid:0,wd:'Nov 10, 2026',pp:25,pd:3500,tot:14000,mg:38,quote:'HKD 110,000 (sponsored at 50% off)',
    brief:'Clean structured column gown. Minimal. Off-white/champagne. Possible slit.',
    kyc:'Finance professional. Precise and time-driven. Wants weekly updates. No surprises.',gk:'Sofia Chen (direct)',
    tl:[{d:'Apr 20',l:'Kickoff brief',done:1},{d:'May 10',l:'Design concept',cur:1,over:1},{d:'Jun 5',l:'Design sign-off'},{d:'Jul 15',l:'First toile'},{d:'Sep 1',l:'Fitting'},{d:'Oct 15',l:'Final fitting'},{d:'Nov 1',l:'Delivery'}],
-   disc:[{d:'Apr 25',f:'Roéma',t:'Welcome sent. Design questionnaire shared.'},{d:'Apr 26',f:'Bride',t:'Questionnaire completed. Reference images attached.'}]}
+   disc:[{d:'Apr 25',f:'Roéma',t:'Welcome sent. Design questionnaire shared.'},{d:'Apr 26',f:'Bride',t:'Questionnaire completed. Reference images attached.'}],
+   files:[{n:'Sofia — design questionnaire.pdf',t:'pdf',sz:'600 KB',d:'Apr 26'},{n:'Reference inspiration.jpg',t:'img',sz:'1.5 MB',d:'Apr 26'}],
+   payouts:[]}
 ];
 
 const PROS=[
@@ -159,8 +172,51 @@ const COMMS=[
   {bride:'Priya Sharma',last:'5 days',sc:'teal',st:'Fitting stage',i:'PS'},
 ];
 
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+// For 2026: 1st of each month, day of week (0=Mon)
+const FIRST_DOW_2026=[3,6,6,2,4,0,2,5,1,3,6,1];
+const DAYS_IN_MONTH=[31,28,31,30,31,30,31,31,30,31,30,31];
+const TODAY_MONTH=4, TODAY_DAY=11; // May 11, 2026
+
 function bdg(lbl,key){const c=sc[key]||sc.blue;return`<span class="pill" style="background:${c.bg};color:${c.tx};">${lbl}</span>`;}
 function av(ini,key,sz){const c=sc[key]||sc.blue;const s=sz||28;return`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${c.bg};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${Math.round(s*.37)}px;font-weight:500;flex-shrink:0;">${ini}</div>`;}
+function tierBadge(t){const s=tierStyles[t]||tierStyles['non-RCL'];return`<span class="pill" style="background:${s.bg};color:${s.tx};font-weight:500;" title="${s.title}">${s.label}</span>`;}
+
+function parseMonth(dStr){const p=dStr.split(' ');return MONTHS.indexOf(p[0]);}
+function parseDay(dStr){const p=dStr.split(' ');return parseInt(p[1]);}
+
+// milestones: [{day, label, sc, status:'done'|'cur'|'over'|'upcoming', bride?}]
+function monthCal(month,year,milestones,opts){
+  opts=opts||{};
+  const fdow=FIRST_DOW_2026[month], dim=DAYS_IN_MONTH[month];
+  const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
+  let cells='';
+  for(let i=0;i<fdow;i++) cells+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=dim;d++){
+    const dayMs=milestones.filter(m=>m.day===d);
+    const isToday=(month===TODAY_MONTH && d===TODAY_DAY);
+    cells+=`<div class="cal-cell ${isToday?'today':''}" ${dayMs.length?`onclick="alert('${dayMs.map(m=>m.label.replace(/'/g,'')).join(' · ')}')"`:''} style="${dayMs.length?'cursor:pointer;':''}">
+      <div style="font-weight:${isToday||dayMs.length?'500':'400'};">${d}</div>
+      ${dayMs.slice(0,2).map(m=>{const col=sc[m.sc]||sc.blue;const dim=m.status==='done'?0.5:1;return`<div class="ev" style="background:${col.bg};color:${col.tx};opacity:${dim};">${m.label}</div>`}).join('')}
+      ${dayMs.length>2?`<div class="ev" style="color:var(--color-text-tertiary);background:none;padding:0;">+${dayMs.length-2} more</div>`:''}
+    </div>`;
+  }
+  return`<div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <button onclick="cnav(-1)" style="border:none;background:none;cursor:pointer;font-size:14px;color:var(--color-text-secondary);padding:2px 6px;">‹</button>
+      <span style="font-size:13px;font-weight:500;">${MONTHS_FULL[month]} ${year}</span>
+      <button onclick="cnav(1)" style="border:none;background:none;cursor:pointer;font-size:14px;color:var(--color-text-secondary);padding:2px 6px;">›</button>
+      ${opts.subtitle?`<span style="font-size:10px;color:var(--color-text-secondary);margin-left:auto;">${opts.subtitle}</span>`:''}
+    </div>
+    <div class="cal-grid">${days.map(d=>`<div class="cal-head">${d}</div>`).join('')}${cells}</div>
+  </div>`;
+}
+
+function cnav(dir){calMonth=Math.max(0,Math.min(11,calMonth+dir));rMN();}
+
+function brideMilestones(b){return b.tl.map(s=>({day:parseDay(s.d),month:parseMonth(s.d),label:s.l,sc:s.done?'green':s.over?'red':s.cur?b.sc:'amber',status:s.done?'done':s.cur?'cur':s.over?'over':'upcoming',bride:b.n}));}
+function designerMilestones(){let all=[];BS.forEach(b=>{brideMilestones(b).forEach(m=>{m.label=`${b.n.split(' ')[0]}: ${m.label}`;m.sc=b.sc;all.push(m);});});return all;}
 
 function rSB(){
   if(vw!=='roema'){document.getElementById('sb').innerHTML='';return;}
@@ -340,9 +396,19 @@ function rBL(){
       <div style="font-size:15px;font-weight:500;">Brides</div>
       <button style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:none;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> Add bride</button>
     </div>
+    <div style="display:flex;gap:6px;margin-bottom:11px;font-size:10px;color:var(--color-text-tertiary);align-items:center;">
+      <span>Filter:</span>
+      <button class="tb active">All</button>
+      <button class="tb">★ RCL</button>
+      <button class="tb">Standard</button>
+      <button class="tb">Sponsored</button>
+    </div>
     ${BS.map(b=>`<div class="br" onclick="sb2(${b.id})">${av(b.i,b.sc)}
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:500;">${b.n}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:500;">${b.n}</div>
+          ${tierBadge(b.tier)}
+        </div>
         <div style="font-size:10px;color:var(--color-text-secondary);">${b.loc} · ${b.wd}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;">${bdg(b.st,b.sc)}<div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">${b.pp}% paid</div></div>
@@ -352,13 +418,26 @@ function rBL(){
 
 function rBD(){
   const b=BS.find(x=>x.id===selB);
-  const tabs=[['brief','Brief'],['timeline','Timeline'],['design','Design'],['payments','Payments'],['notes','Internal notes']];
+  const tabs=[['brief','Brief'],['calendar','Calendar'],['timeline','Timeline'],['design','Design'],['payments','Payments'],['files','Files'],['notes','Internal notes']];
   let c='';
   if(btab==='brief'){
     c=`<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;font-size:12px;line-height:1.6;margin-bottom:9px;">${b.brief}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      ${[['Designer',b.des,''],['Wedding',b.wd,''],['Location',b.loc,''],['Status',b.st,b.sc]].map(([l,v,k])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:12px;font-weight:500;margin-top:1px;">${k?bdg(v,k):v}</div></div>`).join('')}
+      ${[['Designer',b.des,''],['Wedding',b.wd,''],['Location',b.loc,''],['Status',b.st,b.sc],['Tier',tierStyles[b.tier].label,'tier'],['Quotation',b.quote,'']].map(([l,v,k])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:12px;font-weight:500;margin-top:1px;">${k==='tier'?tierBadge(b.tier):k?bdg(v,k):v}</div></div>`).join('')}
     </div>`;
+  } else if(btab==='calendar'){
+    const ms=brideMilestones(b).filter(m=>m.month===calMonth);
+    const next=brideMilestones(b).filter(m=>m.status!=='done').slice(0,5);
+    c=`<div style="margin-bottom:10px;">${monthCal(calMonth,2026,ms,{subtitle:`${ms.length} milestone${ms.length===1?'':'s'} this month`})}</div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;">
+        <div style="font-size:11px;font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-flag" style="font-size:12px;" aria-hidden="true"></i> Coming up</div>
+        ${next.map(m=>`<div style="display:flex;align-items:center;gap:7px;padding:4px 0;font-size:11px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:${sc[m.sc].tx};flex-shrink:0;"></span>
+          <span style="color:var(--color-text-secondary);width:55px;">${MONTHS[m.month]} ${m.day}</span>
+          <span style="flex:1;font-weight:${m.status==='cur'?'500':'400'};">${m.label.split(': ').pop()}</span>
+          ${m.status==='cur'?`<span class="pill" style="background:#FAEEDA;color:#854F0B;">Current</span>`:m.status==='over'?`<span class="pill" style="background:#FCEBEB;color:#A32D2D;">Overdue</span>`:''}
+        </div>`).join('')}
+      </div>`;
   } else if(btab==='timeline'){
     c=b.tl.map(s=>`<div class="tl">
       <div style="display:flex;flex-direction:column;align-items:center;">
@@ -383,14 +462,72 @@ function rBD(){
     </div>`;
   } else if(btab==='payments'){
     const out=b.tot-b.pd;
-    c=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px;">
+    const desTotal=Math.round(b.tot*b.desShare);
+    const desOut=desTotal-b.desPaid;
+    c=`
+    <!-- Client-facing quotation -->
+    <div style="background:linear-gradient(135deg, #FFF8E8 0%, #FFFCF5 100%);border:0.5px solid #E0CC8A;border-radius:var(--border-radius-md);padding:11px 13px;margin-bottom:11px;">
+      <div style="font-size:10px;color:#8A6A1F;margin-bottom:3px;">CLIENT QUOTATION (bride-facing)</div>
+      <div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">${b.quote}</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;">Includes design, fittings, production, delivery. ${b.tier==='sponsored'?'Sponsored pricing — see internal notes.':''}</div>
+    </div>
+
+    <!-- Bride payment status (existing) -->
+    <div style="font-size:11px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><i class="ti ti-receipt" style="font-size:13px;" aria-hidden="true"></i> Bride → Roéma collections</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px;">
       ${[['Contract','$'+b.tot.toLocaleString(),''],['Collected','$'+b.pd.toLocaleString(),'#1D9E75'],['Outstanding','$'+out.toLocaleString(),'#D85A30']].map(([l,v,col])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:14px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
     </div>
     <div style="background:var(--color-background-secondary);border-radius:4px;padding:2px;margin-bottom:7px;"><div style="height:6px;border-radius:3px;background:#1D9E75;width:${b.pp}%;"></div></div>
-    <div style="font-size:10px;color:var(--color-text-secondary);text-align:right;margin-bottom:9px;">${b.pp}% collected</div>
-    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;">
-      <div style="display:grid;grid-template-columns:1fr 80px 70px 90px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:5px;"><span>Milestone</span><span>Amount</span><span>Status</span><span>Reminder</span></div>
-      ${[['Deposit (25%)',b.tot*.25,b.pp>=25,'—'],['2nd payment (25%)',b.tot*.25,b.pp>=50,'Auto-sent 7d'],['3rd payment (25%)',b.tot*.25,b.pp>=75,'Scheduled'],['Final (25%)',b.tot*.25,b.pp>=100,'Scheduled']].map(([m,a,paid,rem])=>`<div style="display:grid;grid-template-columns:1fr 80px 70px 90px;font-size:11px;padding:7px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:5px;"><span>${m}</span><span>$${a.toLocaleString()}</span><span style="color:${paid?'#0F6E56':'var(--color-text-secondary)'};">${paid?'✓ Paid':'Pending'}</span><span style="font-size:10px;color:var(--color-text-secondary);">${rem}</span></div>`).join('')}
+    <div style="font-size:10px;color:var(--color-text-secondary);text-align:right;margin-bottom:11px;">${b.pp}% collected · <span style="color:#0F6E56;">via Airwallex</span></div>
+    <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 80px 80px 100px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:5px;"><span>Milestone</span><span>Amount</span><span>Status</span><span>Reminder</span></div>
+      ${[['Deposit (25%)',b.tot*.25,b.pp>=25,'—'],['2nd payment (25%)',b.tot*.25,b.pp>=50,'Auto-sent 7d'],['3rd payment (25%)',b.tot*.25,b.pp>=75,'Scheduled'],['Final (25%)',b.tot*.25,b.pp>=100,'Scheduled']].map(([m,a,paid,rem])=>`<div style="display:grid;grid-template-columns:1fr 80px 80px 100px;font-size:11px;padding:7px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:5px;"><span>${m}</span><span>$${a.toLocaleString()}</span><span style="color:${paid?'#0F6E56':'var(--color-text-secondary)'};">${paid?'✓ Paid':'Pending'}</span><span style="font-size:10px;color:var(--color-text-secondary);">${rem}</span></div>`).join('')}
+    </div>
+
+    <!-- Designer payout tracker (internal) -->
+    <div style="border:1px dashed #B8963E;border-radius:var(--border-radius-md);padding:11px 13px;background:#FDFBF6;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <i class="ti ti-lock" style="font-size:13px;color:#8A6A1F;" aria-hidden="true"></i>
+        <span style="font-size:11px;font-weight:500;color:#8A6A1F;">Designer payout — Roéma ↔ ${b.des}</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--color-text-tertiary);">Internal only · hidden from bride</span>
+      </div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:9px;">Payment flow: Bride → Roéma → Designer. ${b.des} has a ${Math.round(b.desShare*100)}% profit share on this gown.</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+        ${[['Designer share',`${Math.round(b.desShare*100)}%`,''],['Designer total',`$${desTotal.toLocaleString()}`,''],['Paid to designer',`$${b.desPaid.toLocaleString()}`,'#1D9E75'],['Owed to designer',`$${desOut.toLocaleString()}`,desOut>0?'#D85A30':'#1D9E75']].map(([l,v,col])=>`<div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 9px;"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:13px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
+      </div>
+      <div style="font-size:10px;font-weight:500;color:var(--color-text-secondary);margin-bottom:5px;">Payout history</div>
+      ${b.payouts.length===0?`<div style="font-size:11px;color:var(--color-text-tertiary);font-style:italic;padding:6px 0;">No payouts yet.</div>`:b.payouts.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;border-bottom:0.5px solid var(--color-border-tertiary);">
+        <span style="width:50px;color:var(--color-text-secondary);font-size:10px;">${p.d}</span>
+        <span style="flex:1;">${p.note}</span>
+        <span style="font-weight:500;color:#1D9E75;">$${p.amt.toLocaleString()}</span>
+      </div>`).join('')}
+      <button style="margin-top:8px;font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid #B8963E;color:#B8963E;background:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> Log designer payout</button>
+    </div>`;
+  } else if(btab==='files'){
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;display:flex;align-items:center;gap:5px;">
+      <i class="ti ti-folder" style="font-size:13px;" aria-hidden="true"></i> Bride decks, mood boards, sketches, fabric swatches. Synced from Google Drive folder.
+    </div>
+    <div style="border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:18px;text-align:center;margin-bottom:11px;background:var(--color-background-secondary);cursor:pointer;">
+      <i class="ti ti-cloud-upload" style="font-size:22px;color:var(--color-text-tertiary);" aria-hidden="true"></i>
+      <div style="font-size:12px;font-weight:500;margin-top:5px;">Drop files here, or click to browse</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">PDFs, images, sketches — anything for this bride</div>
+    </div>
+    <div style="font-size:11px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><i class="ti ti-file" style="font-size:12px;" aria-hidden="true"></i> Files (${b.files.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+      ${b.files.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);">
+        <div style="width:32px;height:32px;border-radius:var(--border-radius-md);background:${f.t==='pdf'?'#FCEBEB':'#E6F1FB'};color:${f.t==='pdf'?'#A32D2D':'#185FA5'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ${f.t==='pdf'?'ti-file-text':'ti-photo'}" style="font-size:15px;" aria-hidden="true"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.n}</div>
+          <div style="font-size:9px;color:var(--color-text-secondary);">${f.sz} · ${f.d}</div>
+        </div>
+        <button style="border:none;background:none;cursor:pointer;color:var(--color-text-tertiary);padding:3px;"><i class="ti ti-dots-vertical" style="font-size:13px;" aria-hidden="true"></i></button>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:11px;border-top:0.5px solid var(--color-border-tertiary);padding-top:9px;font-size:10px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:5px;">
+      <i class="ti ti-brand-google-drive" style="font-size:12px;" aria-hidden="true"></i>
+      Open Google Drive folder: <a href="#" style="color:var(--color-text-info);">/Brides/${b.n.replace(/ /g,'_')}/</a>
     </div>`;
   } else {
     c=`<div style="display:flex;align-items:center;gap:5px;margin-bottom:9px;"><i class="ti ti-lock" style="font-size:13px;color:var(--color-text-secondary);" aria-hidden="true"></i><span style="font-size:11px;color:var(--color-text-secondary);">Roéma + Designer only</span></div>
@@ -402,9 +539,11 @@ function rBD(){
     </div>`;
   }
   return`<div>
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:11px;">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:11px;flex-wrap:wrap;">
       <button onclick="sb2(null)" style="border:none;background:none;cursor:pointer;font-size:12px;color:var(--color-text-secondary);padding:0;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrow-left" style="font-size:13px;" aria-hidden="true"></i>Brides</button>
-      <span style="color:var(--color-text-tertiary);">/</span><span style="font-size:13px;font-weight:500;">${b.n}</span>
+      <span style="color:var(--color-text-tertiary);">/</span>
+      <span style="font-size:13px;font-weight:500;">${b.n}</span>
+      ${tierBadge(b.tier)}
       <span style="margin-left:auto;">${bdg(b.st,b.sc)}</span>
     </div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:11px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:9px;">
@@ -418,13 +557,13 @@ function rBooks(){
       ${[['Contracted','$62,000',''],['Collected','$32,500','#1D9E75'],['Avg margin','38%','']].map(([l,v,c])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:17px;font-weight:500;${c?'color:'+c:''}">${v}</div></div>`).join('')}
     </div>
     <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;">
-      <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:4px;"><span>Bride</span><span>Contract</span><span>Paid</span><span>Outstanding</span><span>Margin</span><span>Status</span></div>
-      ${BS.map(b=>`<div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:11px;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:4px;align-items:center;">
-        <div style="display:flex;align-items:center;gap:5px;">${av(b.i,b.sc,22)}<span>${b.n.split(' ')[0]}</span></div>
+      <div style="display:grid;grid-template-columns:1.4fr 60px 60px 70px 60px 80px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:6px 10px;gap:4px;"><span>Bride</span><span>Contract</span><span>Paid</span><span>Outstanding</span><span>Margin</span><span>Status</span></div>
+      ${BS.map(b=>`<div style="display:grid;grid-template-columns:1.4fr 60px 60px 70px 60px 80px;font-size:11px;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);gap:4px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:5px;min-width:0;">${av(b.i,b.sc,22)}<span>${b.n.split(' ')[0]}</span>${tierBadge(b.tier)}</div>
         <span>$${b.tot.toLocaleString()}</span><span style="color:#1D9E75;">$${b.pd.toLocaleString()}</span>
         <span style="color:#D85A30;">$${(b.tot-b.pd).toLocaleString()}</span><span>${b.mg}%</span>${bdg(b.st,b.sc)}
       </div>`).join('')}
-      <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 55px 80px;font-size:11px;font-weight:500;padding:8px 10px;border-top:0.5px solid var(--color-border-secondary);gap:4px;background:var(--color-background-secondary);">
+      <div style="display:grid;grid-template-columns:1.4fr 60px 60px 70px 60px 80px;font-size:11px;font-weight:500;padding:8px 10px;border-top:0.5px solid var(--color-border-secondary);gap:4px;background:var(--color-background-secondary);">
         <span>Total</span><span>$62,000</span><span style="color:#1D9E75;">$32,500</span><span style="color:#D85A30;">$29,500</span><span>38%</span><span></span>
       </div>
     </div>
@@ -465,6 +604,7 @@ function rTeam(){
   </div>`;}
 
 function rDes(){
+  const ms=designerMilestones().filter(m=>m.month===calMonth);
   return`<div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
       <div><div style="font-size:15px;font-weight:500;">Good morning, Putri</div><div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier · Designer portal</div></div>
@@ -474,29 +614,49 @@ function rDes(){
       <div style="font-size:11px;font-weight:500;color:#A32D2D;margin-bottom:4px;"><i class="ti ti-alert-triangle" style="font-size:12px;" aria-hidden="true"></i> 2 items need your attention</div>
       ${OVERDUES.map(o=>`<div style="font-size:11px;padding:2px 0;color:#A32D2D;">${bdg(o.bride,o.sc)} ${o.item} — ${o.days}d overdue</div>`).join('')}
     </div>
-    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px 12px;margin-bottom:10px;border-left:2px solid ${G};">
-      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;"><i class="ti ti-bell" style="font-size:11px;" aria-hidden="true"></i> Action needed today</div>
-      <div style="font-size:12px;font-weight:500;">Mei Lin Tan — Toile fitting (May 11)</div>
-      <div style="font-size:11px;color:var(--color-text-secondary);">Ensure toile is ready and measurements confirmed.</div>
+
+    <!-- Designer schedule calendar -->
+    <div class="card" style="padding:11px 13px;margin-bottom:11px;">
+      <div style="font-size:11px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:5px;"><i class="ti ti-calendar-event" style="font-size:13px;" aria-hidden="true"></i> Your schedule</div>
+      ${monthCal(calMonth,2026,ms,{subtitle:`${ms.length} milestone${ms.length===1?'':'s'} across ${BS.length} brides`})}
+      <div style="margin-top:10px;border-top:0.5px solid var(--color-border-tertiary);padding-top:8px;font-size:10px;color:var(--color-text-tertiary);">Click a day with milestones to see details. Coloured by bride.</div>
     </div>
+
     <div style="font-size:12px;font-weight:500;margin-bottom:8px;">My brides</div>
     ${BS.map(b=>`<div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px;margin-bottom:7px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:7px;">${av(b.i,b.sc)}<div><div style="font-size:12px;font-weight:500;">${b.n}</div><div style="font-size:10px;color:var(--color-text-secondary);">${b.wd}</div></div></div>${bdg(b.st,b.sc)}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">${av(b.i,b.sc)}<div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"><span style="font-size:12px;font-weight:500;">${b.n}</span>${tierBadge(b.tier)}</div><div style="font-size:10px;color:var(--color-text-secondary);">${b.wd}</div></div></div>${bdg(b.st,b.sc)}
       </div>
       <div style="font-size:10px;color:var(--color-text-secondary);">Next</div>
       <div style="font-size:12px;font-weight:500;">${b.tl.find(t=>!t.done)?.l||'Done'} <span style="font-weight:400;color:var(--color-text-secondary);">· ${b.tl.find(t=>!t.done)?.d||''}</span></div>
       <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;margin-top:5px;font-size:11px;color:var(--color-text-secondary);">${b.disc[b.disc.length-1].f}: "${b.disc[b.disc.length-1].t.substring(0,55)}..."</div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;margin-top:5px;font-size:10px;color:var(--color-text-secondary);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span><i class="ti ti-coin" style="font-size:11px;" aria-hidden="true"></i> Your share: <strong>${Math.round(b.desShare*100)}%</strong> · Owed: <strong style="color:${b.tot*b.desShare-b.desPaid>0?'#D85A30':'#0F6E56'};">$${(Math.round(b.tot*b.desShare)-b.desPaid).toLocaleString()}</strong></span>
+      </div>
       ${b.id===1?`<div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:5px;margin-top:5px;font-size:10px;color:var(--color-text-secondary);"><i class="ti ti-lock" style="font-size:10px;" aria-hidden="true"></i> Gatekeeper: Henry Tan (father) approves all decisions.</div>`:''}
     </div>`).join('')}
   </div>`;}
 
 function rBride(){
   const b=BS[0];
-  const tabs=[['timeline','My timeline'],['design','Design board'],['payments','Payments']];
+  const tabs=[['calendar','Calendar'],['timeline','Timeline'],['design','Design board'],['payments','Payments']];
   let c='';
-  if(bpTab==='timeline'){
-    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Your gown journey</div>`+b.tl.map(s=>`<div class="tl">
+  if(bpTab==='calendar'){
+    const ms=brideMilestones(b).filter(m=>m.month===calMonth);
+    const next=brideMilestones(b).filter(m=>m.status!=='done').slice(0,5);
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Your gown journey at a glance.</div>
+      ${monthCal(calMonth,2026,ms,{subtitle:`${ms.length} milestone${ms.length===1?'':'s'} this month`})}
+      <div style="margin-top:11px;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;">
+        <div style="font-size:11px;font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:4px;"><i class="ti ti-heart" style="font-size:12px;" aria-hidden="true"></i> Coming up next</div>
+        ${next.map(m=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;font-size:11px;border-bottom:0.5px solid var(--color-border-tertiary);">
+          <span style="width:6px;height:6px;border-radius:50%;background:${sc[m.sc].tx};flex-shrink:0;"></span>
+          <span style="color:var(--color-text-secondary);width:55px;">${MONTHS[m.month]} ${m.day}</span>
+          <span style="flex:1;font-weight:${m.status==='cur'?'500':'400'};">${m.label.split(': ').pop()}</span>
+          ${m.status==='cur'?`<span class="pill" style="background:#FAEEDA;color:#854F0B;">We are here</span>`:''}
+        </div>`).join('')}
+      </div>`;
+  } else if(bpTab==='timeline'){
+    c=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:9px;">Step-by-step view of your gown journey.</div>`+b.tl.map(s=>`<div class="tl">
       <div style="display:flex;flex-direction:column;align-items:center;">
         <div class="tld" style="background:${s.done?'#1D9E75':s.cur?G:'var(--color-border-secondary)'}"></div>
         <div style="width:1px;flex:1;min-height:16px;background:var(--color-border-tertiary);"></div>
@@ -520,21 +680,30 @@ function rBride(){
     </div>`;
   } else {
     const out=b.tot-b.pd;
-    c=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px;">
-      ${[['Total investment','$'+b.tot.toLocaleString(),''],['Outstanding','$'+out.toLocaleString(),'#D85A30']].map(([l,v,col])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:16px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
+    c=`<div style="background:linear-gradient(135deg, #FFF8E8 0%, #FFFCF5 100%);border:0.5px solid #E0CC8A;border-radius:var(--border-radius-md);padding:11px 13px;margin-bottom:11px;">
+      <div style="font-size:10px;color:#8A6A1F;margin-bottom:3px;">YOUR QUOTATION</div>
+      <div style="font-size:18px;font-weight:500;">${b.quote}</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;">All-inclusive: design, fittings, production, delivery.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px;">
+      ${[['Paid so far','$'+b.pd.toLocaleString(),'#1D9E75'],['Outstanding','$'+out.toLocaleString(),'#D85A30']].map(([l,v,col])=>`<div class="mc"><div style="font-size:9px;color:var(--color-text-secondary);">${l}</div><div style="font-size:16px;font-weight:500;${col?'color:'+col:''}">${v}</div></div>`).join('')}
     </div>
     <div style="background:var(--color-background-secondary);border-radius:4px;padding:2px;margin-bottom:7px;"><div style="height:6px;border-radius:3px;background:#1D9E75;width:${b.pp}%;"></div></div>
     <div style="font-size:10px;color:var(--color-text-secondary);text-align:right;margin-bottom:9px;">${b.pp}% paid</div>
     <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px;">
       <div style="font-size:10px;font-weight:500;margin-bottom:3px;">Next payment</div>
       <div style="font-size:14px;font-weight:500;color:#D85A30;">$${(b.tot*0.25).toLocaleString()}</div>
-      <div style="font-size:10px;color:var(--color-text-secondary);">Due Jun 15, 2025 · Fabric sign-off</div>
-      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;"><i class="ti ti-bell" style="font-size:10px;" aria-hidden="true"></i> You will receive a reminder 7, 3, and 1 day before</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);">Due Jun 15, 2026 · Fabric sign-off</div>
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;"><i class="ti ti-bell" style="font-size:10px;" aria-hidden="true"></i> You'll receive a reminder 7, 3, and 1 day before</div>
+      <button style="margin-top:8px;font-size:11px;padding:5px 11px;border-radius:var(--border-radius-md);border:0.5px solid #B8963E;color:#B8963E;background:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-credit-card" style="font-size:11px;" aria-hidden="true"></i> Pay now via Airwallex</button>
     </div>`;
   }
   return`<div>
     <div style="border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:10px;margin-bottom:11px;">
-      <div style="font-size:15px;font-weight:500;">Hello, Mei Lin</div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+        <div style="font-size:15px;font-weight:500;">Hello, Mei Lin</div>
+        ${tierBadge(b.tier)}
+      </div>
       <div style="font-size:11px;color:var(--color-text-secondary);">Roéma Atelier bride portal · ${b.wd}</div>
     </div>
     <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:8px 11px;margin-bottom:11px;display:flex;align-items:center;gap:7px;">
@@ -547,7 +716,7 @@ function rBride(){
 
 function sv(v){vw=v;['roema','designer','bride'].forEach(id=>document.getElementById('vbtn-'+id).classList.toggle('active',id===v));if(v==='roema')rnav='dashboard';render();}
 function sn(n){rnav=n;selB=null;render();}
-function sb2(id){selB=id;btab='brief';render();}
+function sb2(id){selB=id;btab='brief';calMonth=4;render();}
 function sbt(t){btab=t;rMN();}
 function sbpt(t){bpTab=t;rMN();}
 function render(){rSB();rMN();}
