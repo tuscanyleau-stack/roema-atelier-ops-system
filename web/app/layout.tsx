@@ -1,37 +1,24 @@
-import type { Metadata } from "next";
-import { Fraunces, Montserrat } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Fraunces } from 'next/font/google'
+import './globals.css'
 
 const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  display: "swap",
-  axes: ["opsz", "SOFT"],
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  display: "swap",
-});
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fraunces',
+})
 
 export const metadata: Metadata = {
-  title: "Roéma Atelier — Ops System",
-  description:
-    "Internal operations platform for Roéma Atelier — bespoke bridal couture.",
-};
+  title: 'Roéma Atelier — Operations',
+  description: 'Internal operations system for Roéma Atelier',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${montserrat.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="en" className={fraunces.variable}>
+      <body>{children}</body>
     </html>
-  );
+  )
 }

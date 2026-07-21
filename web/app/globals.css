@@ -27,3 +27,295 @@ body {
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.003em;
 }
+/* ============================================
+   ROÉMA ATELIER — house style
+   Append this to the BOTTOM of web/app/globals.css
+   ============================================ */
+
+:root {
+  --paper:  #F3F2EF;  /* pattern paper */
+  --card:   #FDFDFC;  /* cut cloth */
+  --ink:    #17171A;  /* charcoal */
+  --muted:  #8A8A85;  /* pencil */
+  --line:   #E4E3DE;  /* hairline */
+  --chalk:  #5B6E8C;  /* tailor's chalk */
+  --thread: #A8443C;  /* tacking thread */
+}
+
+/* Fraunces everywhere, including form controls which do not inherit */
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fraunces is a variable serif — soften the optical size at small sizes
+   so labels stay legible rather than turning spindly */
+.text-\[9px\],
+.text-\[10px\],
+.text-\[11px\] {
+  font-variation-settings: "opsz" 9, "SOFT" 20;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- interaction ---------- */
+
+button,
+a,
+select,
+[role="button"] {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Cards that behave like buttons get a quiet lift */
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -18px rgba(23, 23, 26, 0.35);
+}
+.lift:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Rows reveal a chalk rule on the leading edge instead of a flat grey fill */
+.row-mark {
+  position: relative;
+}
+.row-mark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  background: var(--chalk);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.row-mark:hover::before {
+  transform: scaleY(1);
+}
+
+/* Visible keyboard focus, chalk blue */
+:focus-visible {
+  outline: 2px solid var(--chalk);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- login sequence ---------- */
+
+@keyframes seam-draw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes rule-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes settle {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.anim-seam {
+  animation: seam-draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top center;
+}
+.anim-rule {
+  animation: rule-draw 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+.anim-rise   { animation: rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-settle { animation: settle 0.9s ease both; }
+
+.d1 { animation-delay: 0.20s; }
+.d2 { animation-delay: 0.38s; }
+.d3 { animation-delay: 0.54s; }
+.d4 { animation-delay: 0.68s; }
+.d5 { animation-delay: 0.82s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-seam,
+  .anim-rule,
+  .anim-rise,
+  .anim-settle {
+    animation: none;
+  }
+  .lift:hover {
+    transform: none;
+  }
+  button,
+  a,
+  select,
+  [role="button"] {
+    transition: none;
+  }
+}
+/* ============================================
+   ROÉMA ATELIER — house style
+   Append this to the BOTTOM of web/app/globals.css
+   ============================================ */
+
+:root {
+  --paper:  #F3F2EF;  /* pattern paper */
+  --card:   #FDFDFC;  /* cut cloth */
+  --ink:    #17171A;  /* charcoal */
+  --muted:  #8A8A85;  /* pencil */
+  --line:   #E4E3DE;  /* hairline */
+  --chalk:  #5B6E8C;  /* tailor's chalk */
+  --thread: #A8443C;  /* tacking thread */
+}
+
+/* Fraunces everywhere, including form controls which do not inherit */
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fraunces is a variable serif — soften the optical size at small sizes
+   so labels stay legible rather than turning spindly */
+.text-\[9px\],
+.text-\[10px\],
+.text-\[11px\] {
+  font-variation-settings: "opsz" 9, "SOFT" 20;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- interaction ---------- */
+
+button,
+a,
+select,
+[role="button"] {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Cards that behave like buttons get a quiet lift */
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -18px rgba(23, 23, 26, 0.35);
+}
+.lift:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Rows reveal a chalk rule on the leading edge instead of a flat grey fill */
+.row-mark {
+  position: relative;
+}
+.row-mark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  background: var(--chalk);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.row-mark:hover::before {
+  transform: scaleY(1);
+}
+
+/* Visible keyboard focus, chalk blue */
+:focus-visible {
+  outline: 2px solid var(--chalk);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- login sequence ---------- */
+
+@keyframes seam-draw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes rule-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes settle {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.anim-seam {
+  animation: seam-draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top center;
+}
+.anim-rule {
+  animation: rule-draw 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+.anim-rise   { animation: rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-settle { animation: settle 0.9s ease both; }
+
+.d1 { animation-delay: 0.20s; }
+.d2 { animation-delay: 0.38s; }
+.d3 { animation-delay: 0.54s; }
+.d4 { animation-delay: 0.68s; }
+.d5 { animation-delay: 0.82s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-seam,
+  .anim-rule,
+  .anim-rise,
+  .anim-settle {
+    animation: none;
+  }
+  .lift:hover {
+    transform: none;
+  }
+  button,
+  a,
+  select,
+  [role="button"] {
+    transition: none;
+  }
+}
