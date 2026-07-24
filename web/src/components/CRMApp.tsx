@@ -14,6 +14,7 @@ interface Bride {
   wedding_date: string | null
   kyc: string
   gatekeeper: string
+  currency: string | null
 }
 
 interface Project {
@@ -28,6 +29,8 @@ interface Project {
   total: number
   paid: number
   margin: number
+  service: string | null
+  engagement_type: string | null
   sort_order: number
 }
 
@@ -72,6 +75,7 @@ const COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   blue: { bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-500' },
   coral: { bg: 'bg-orange-50', text: 'text-orange-800', dot: 'bg-orange-500' },
   green: { bg: 'bg-green-50', text: 'text-green-800', dot: 'bg-green-500' },
+  purple: { bg: 'bg-purple-50', text: 'text-purple-800', dot: 'bg-purple-500' },
   red: { bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-500' },
 }
 
@@ -81,6 +85,7 @@ const AVATARS: Record<string, string> = {
   blue: 'bg-blue-100 text-blue-800',
   coral: 'bg-orange-100 text-orange-800',
   green: 'bg-green-100 text-green-800',
+  purple: 'bg-purple-100 text-purple-800',
   red: 'bg-red-100 text-red-800',
 }
 
@@ -96,22 +101,55 @@ const ROLE_COLORS: Record<string, string> = {
   bride: 'blue',
 }
 
-const STATUSES = ['Brief confirmed', 'Design review', 'Production', 'Fitting stage', 'Delivered']
+const STATUSES = ['Brief confirmed', 'In progress', 'Design review', 'Production', 'Fitting stage', 'Delivered']
 
 const STATUS_STAGE: Record<string, { color: string; icon: string }> = {
   'Brief confirmed': { color: 'blue', icon: '📋' },
+  'In progress': { color: 'purple', icon: '⏳' },
   'Design review': { color: 'amber', icon: '✎' },
   'Production': { color: 'teal', icon: '🧵' },
   'Fitting stage': { color: 'coral', icon: '👗' },
   'Delivered': { color: 'green', icon: '📦' },
 }
 
-const WORKSTREAM_PRESETS = ['Main gown', 'Cheongsam', 'Reception dress', 'Bridesmaids', 'Mother of the bride', 'Veil & accessories']
+// "In progress" is reserved for RCL (roéma Complete Lead) workstreams
+function isRCL(service?: string | null): boolean {
+  return !!service && service.toUpperCase().startsWith('RCL')
+}
+
+function statusOptionsFor(service?: string | null, current?: string): string[] {
+  const base = isRCL(service) ? STATUSES : STATUSES.filter(s => s !== 'In progress')
+  return current && !base.includes(current) ? [current, ...base] : base
+}
+
+const SERVICES = [
+  'Baseline (complimentary)',
+  'Discovery Path',
+  'Couture Brief & Planning Deck',
+  'RCL — roéma Complete Lead',
+  'Whiteglove — Overseas Couture Trip',
+  'Whiteglove — Founder Presence',
+  'Whiteglove — Wedding Day Styling',
+]
+
+const ENGAGEMENTS = ['Bespoke', 'Rental']
+
+const CURRENCIES = ['MYR', 'SGD', 'AUD', 'USD']
+const CURRENCY_SYMBOLS: Record<string, string> = { MYR: 'RM', SGD: 'S$', AUD: 'A$', USD: 'US$' }
+
+const WORKSTREAM_PRESETS = [
+  'Main gown', 'Prewedding', 'Welcome event', 'Wedding robe', 'Second march-in gown',
+  'Tea ceremony', 'GDL', 'After-party look', 'Farewell event',
+  'Cheongsam', 'Reception dress', 'Bridesmaids', 'Mother of the bride', 'Veil & accessories',
+]
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DOW = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
-const money = (n: number) => '$' + (n || 0).toLocaleString()
+const money = (n: number, currency?: string | null) => {
+  const code = currency || 'MYR'
+  return (CURRENCY_SYMBOLS[code] || code + ' ') + (n || 0).toLocaleString()
+}
 
 function initialsOf(name: string): string {
   const parts = (name || '').trim().split(/\s+/).filter(Boolean)
@@ -192,6 +230,33 @@ function Panel({ title, icon, action, children }: { title: string; icon?: string
         {action}
       </div>
       {children}
+    </div>
+  )
+}
+
+function WorkstreamNameField({ value, onChange, className }: {
+  value: string
+  onChange: (v: string) => void
+  className: string
+}) {
+  const [custom, setCustom] = useState(false)
+  const isPreset = WORKSTREAM_PRESETS.includes(value)
+  const showCustom = custom || (value !== '' && !isPreset)
+  return (
+    <div>
+      <select className={className} value={showCustom ? '__custom__' : value}
+        onChange={e => {
+          if (e.target.value === '__custom__') { setCustom(true) }
+          else { setCustom(false); onChange(e.target.value) }
+        }}>
+        {value === '' && !showCustom && <option value="">Choose…</option>}
+        {WORKSTREAM_PRESETS.map(w => <option key={w} value={w}>{w}</option>)}
+        <option value="__custom__">Custom…</option>
+      </select>
+      {showCustom && (
+        <input className={className + ' mt-1.5'} value={value} onChange={e => onChange(e.target.value)}
+          placeholder="Type the workstream name" />
+      )}
     </div>
   )
 }
@@ -459,7 +524,7 @@ function BridesList({ brides, projects, milestones, designers, onSelect, showAdd
                   <p className="text-[10px] text-gray-400">{mine.length} workstream{mine.length === 1 ? '' : 's'}</p>
                   {t.total > 0 && (
                     <>
-                      <p className="text-xs font-medium text-gray-800 mt-1">{money(t.total)}</p>
+                      <p className="text-xs font-medium text-gray-800 mt-1">{money(t.total, b.currency)}</p>
                       <p className="text-[10px] text-gray-400">{pct}% paid</p>
                     </>
                   )}
@@ -499,7 +564,17 @@ function Dashboard({ brides, projects, prospects, milestones, onOpenBride, onGot
     return map
   }, [projects])
 
-  const totals = projects.reduce((a, p) => ({ total: a.total + (p.total || 0), paid: a.paid + (p.paid || 0) }), { total: 0, paid: 0 })
+  const revenueByCurrency = useMemo(() => {
+    const map: Record<string, { total: number; paid: number }> = {}
+    projects.forEach(p => {
+      const cur = brideById[p.bride_id]?.currency || 'MYR'
+      if (!map[cur]) map[cur] = { total: 0, paid: 0 }
+      map[cur].total += p.total || 0
+      map[cur].paid += p.paid || 0
+    })
+    return map
+  }, [projects, brideById])
+  const currencyKeys = Object.keys(revenueByCurrency).length ? Object.keys(revenueByCurrency).sort() : ['MYR']
   const avgMargin = projects.length ? Math.round(projects.reduce((a, p) => a + (p.margin || 0), 0) / projects.length) : 0
 
   const label = (m: Milestone) => {
@@ -630,14 +705,16 @@ function Dashboard({ brides, projects, prospects, milestones, onOpenBride, onGot
           <Panel title="Revenue" icon="📊">
             <div className="grid grid-cols-2 gap-2">
               {[
-                ['Contracted', money(totals.total), ''],
-                ['Collected', money(totals.paid), 'text-emerald-600'],
-                ['Outstanding', money(totals.total - totals.paid), 'text-red-500'],
-                ['Avg margin', avgMargin + '%', ''],
-              ].map(([l, v, c], i) => (
-                <div key={i} className="bg-gray-50 rounded-lg p-2.5">
-                  <p className="text-[9px] text-gray-400">{l}</p>
-                  <p className={`text-base font-semibold ${c}`}>{v}</p>
+                { label: 'Contracted', cls: '', lines: currencyKeys.map(c => money(revenueByCurrency[c]?.total || 0, c)) },
+                { label: 'Collected', cls: 'text-emerald-600', lines: currencyKeys.map(c => money(revenueByCurrency[c]?.paid || 0, c)) },
+                { label: 'Outstanding', cls: 'text-red-500', lines: currencyKeys.map(c => money((revenueByCurrency[c]?.total || 0) - (revenueByCurrency[c]?.paid || 0), c)) },
+                { label: 'Avg margin', cls: '', lines: [avgMargin + '%'] },
+              ].map(cell => (
+                <div key={cell.label} className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-[9px] text-gray-400">{cell.label}</p>
+                  {cell.lines.map((v, i) => (
+                    <p key={i} className={`${currencyKeys.length > 1 ? 'text-sm' : 'text-base'} font-semibold ${cell.cls}`}>{v}</p>
+                  ))}
                 </div>
               ))}
             </div>
@@ -655,7 +732,7 @@ function Dashboard({ brides, projects, prospects, milestones, onOpenBride, onGot
                       <Avatar initials={b.initials || initialsOf(b.name)} color="blue" sm />
                       <span className="text-[11px] text-gray-700 flex-1 truncate">{b.name}</span>
                       <span className="text-[10px] text-gray-400">{pct}%</span>
-                      <span className="text-[11px] font-medium text-red-500 w-16 text-right">{money(t.total - t.paid)}</span>
+                      <span className="text-[11px] font-medium text-red-500 w-20 text-right">{money(t.total - t.paid, b.currency)}</span>
                     </button>
                   )
                 })}
@@ -846,8 +923,17 @@ function CalendarPanel({ brides, projects, milestones, onOpenBride }: {
 }
 
 function Books({ brides, projects }: { brides: Bride[]; projects: Project[] }) {
-  const totals = projects.reduce((a, p) => ({ total: a.total + (p.total || 0), paid: a.paid + (p.paid || 0) }), { total: 0, paid: 0 })
-  const estProfit = Math.round(projects.reduce((a, p) => a + ((p.total || 0) * (p.margin || 0) / 100), 0))
+  const brideById: Record<string, Bride> = {}
+  brides.forEach(b => { brideById[b.id] = b })
+  const byCurrency: Record<string, { total: number; paid: number; profit: number }> = {}
+  projects.forEach(p => {
+    const cur = brideById[p.bride_id]?.currency || 'MYR'
+    if (!byCurrency[cur]) byCurrency[cur] = { total: 0, paid: 0, profit: 0 }
+    byCurrency[cur].total += p.total || 0
+    byCurrency[cur].paid += p.paid || 0
+    byCurrency[cur].profit += (p.total || 0) * (p.margin || 0) / 100
+  })
+  const currencyKeys = Object.keys(byCurrency).length ? Object.keys(byCurrency).sort() : ['MYR']
 
   return (
     <div>
@@ -860,12 +946,17 @@ function Books({ brides, projects }: { brides: Bride[]; projects: Project[] }) {
       </div>
       <div className="grid grid-cols-4 gap-3 mb-4">
         {[
-          ['Total contracted', money(totals.total), ''],
-          ['Collected', money(totals.paid), 'text-emerald-600'],
-          ['Outstanding', money(totals.total - totals.paid), 'text-red-500'],
-          ['Est. gross profit', money(estProfit), ''],
-        ].map(([l, v, c], i) => (
-          <div key={i} className="bg-gray-50 rounded-xl p-3"><p className="text-[9px] text-gray-400">{l}</p><p className={`text-lg font-semibold ${c}`}>{v}</p></div>
+          { label: 'Total contracted', cls: '', lines: currencyKeys.map(c => money(byCurrency[c]?.total || 0, c)) },
+          { label: 'Collected', cls: 'text-emerald-600', lines: currencyKeys.map(c => money(byCurrency[c]?.paid || 0, c)) },
+          { label: 'Outstanding', cls: 'text-red-500', lines: currencyKeys.map(c => money((byCurrency[c]?.total || 0) - (byCurrency[c]?.paid || 0), c)) },
+          { label: 'Est. gross profit', cls: '', lines: currencyKeys.map(c => money(Math.round(byCurrency[c]?.profit || 0), c)) },
+        ].map(cell => (
+          <div key={cell.label} className="bg-gray-50 rounded-xl p-3">
+            <p className="text-[9px] text-gray-400">{cell.label}</p>
+            {cell.lines.map((v, i) => (
+              <p key={i} className={`${currencyKeys.length > 1 ? 'text-sm' : 'text-lg'} font-semibold ${cell.cls}`}>{v}</p>
+            ))}
+          </div>
         ))}
       </div>
 
@@ -879,7 +970,7 @@ function Books({ brides, projects }: { brides: Bride[]; projects: Project[] }) {
               <div className="flex items-center gap-2 bg-gray-50 px-4 py-2.5">
                 <Avatar initials={b.initials || initialsOf(b.name)} color="blue" sm />
                 <span className="text-xs font-medium text-gray-800">{b.name}</span>
-                <span className="ml-auto text-[10px] text-gray-400">{money(t.total)} · {t.total ? Math.round((t.paid / t.total) * 100) : 0}% paid</span>
+                <span className="ml-auto text-[10px] text-gray-400">{money(t.total, b.currency)} · {t.total ? Math.round((t.paid / t.total) * 100) : 0}% paid</span>
               </div>
               <div className="grid grid-cols-6 px-4 py-2 text-[10px] text-gray-400 gap-2 border-t border-gray-50">
                 <span className="col-span-2">Workstream</span><span>Contract</span><span>Paid</span><span>Outstanding</span><span>Margin</span>
@@ -888,11 +979,11 @@ function Books({ brides, projects }: { brides: Bride[]; projects: Project[] }) {
                 <div key={p.id} className="grid grid-cols-6 items-center px-4 py-2.5 border-t border-gray-50 gap-2">
                   <div className="col-span-2 min-w-0">
                     <p className="text-xs text-gray-800 truncate">{p.name}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{p.designer || 'No designer'}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{p.designer || 'No designer'}{p.service ? ` · ${p.service}` : ''}</p>
                   </div>
-                  <span className="text-xs">{money(p.total)}</span>
-                  <span className="text-xs text-emerald-600">{money(p.paid)}</span>
-                  <span className="text-xs text-red-500">{money((p.total || 0) - (p.paid || 0))}</span>
+                  <span className="text-xs">{money(p.total, b.currency)}</span>
+                  <span className="text-xs text-emerald-600">{money(p.paid, b.currency)}</span>
+                  <span className="text-xs text-red-500">{money((p.total || 0) - (p.paid || 0), b.currency)}</span>
                   <span className="text-xs">{p.margin || 0}%</span>
                 </div>
               ))}
@@ -1111,9 +1202,11 @@ function BridePortal({ brides, projects, milestones, isRealBride, profile, previ
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <p className="text-sm font-semibold text-gray-900">{p.name}</p>
                     <Badge label={p.status} color={p.status_color} />
+                    {p.engagement_type === 'Rental' && <Badge label="Rental" color="coral" />}
                     <span className="ml-auto text-gray-300 text-xs">{isOpen ? '▲' : '▼'}</span>
                   </div>
                   <p className="text-[11px] text-gray-500">Designed by {p.designer || 'your Roéma team'}</p>
+                  {p.service && <p className="text-[10px] text-gray-400 mt-0.5">{p.service}</p>}
                   {next && <p className="text-[11px] text-amber-700 mt-1">Next: {next.label}{next.due_date ? ` · ${prettyDate(next.due_date)}` : ''}</p>}
                   {ms.length > 0 && (
                     <div className="mt-2">
@@ -1172,16 +1265,16 @@ function BridePortal({ brides, projects, milestones, isRealBride, profile, previ
       <div className="bg-white border border-gray-200 rounded-xl p-4">
         <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-3">Payments — all workstreams</p>
         <div className="grid grid-cols-3 gap-3 mb-3">
-          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Total</p><p className="text-base font-semibold">{money(t.total)}</p></div>
-          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Paid</p><p className="text-base font-semibold text-emerald-600">{money(t.paid)}</p></div>
-          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Outstanding</p><p className="text-base font-semibold text-red-500">{money(t.total - t.paid)}</p></div>
+          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Total</p><p className="text-base font-semibold">{money(t.total, b.currency)}</p></div>
+          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Paid</p><p className="text-base font-semibold text-emerald-600">{money(t.paid, b.currency)}</p></div>
+          <div className="bg-gray-50 rounded-lg p-3"><p className="text-[9px] text-gray-400">Outstanding</p><p className="text-base font-semibold text-red-500">{money(t.total - t.paid, b.currency)}</p></div>
         </div>
         {mine.length > 1 && (
           <div className="space-y-1 mb-3 pt-2 border-t border-gray-100">
             {mine.map(p => (
               <div key={p.id} className="flex items-center text-[11px]">
                 <span className="text-gray-600 flex-1">{p.name}</span>
-                <span className="text-gray-400 mr-3">{money(p.paid)} of {money(p.total)}</span>
+                <span className="text-gray-400 mr-3">{money(p.paid, b.currency)} of {money(p.total, b.currency)}</span>
               </div>
             ))}
           </div>
@@ -1282,7 +1375,7 @@ function TeamTab({ brides, currentUserId }: { brides: Bride[]; currentUserId: st
 }
 
 function AddBrideForm({ designers, onDone, onCancel }: { designers: DesignerAccount[]; onDone: () => void; onCancel: () => void }) {
-  const [f, setF] = useState({ name: '', location: '', wedding_date: '', kyc: '', gatekeeper: '', wsName: 'Main gown', wsDesigner: '', wsDesignerId: '' })
+  const [f, setF] = useState({ name: '', location: '', wedding_date: '', kyc: '', gatekeeper: '', currency: 'MYR', wsName: 'Main gown', wsDesigner: '', wsDesignerId: '', wsService: '' })
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -1292,12 +1385,14 @@ function AddBrideForm({ designers, onDone, onCancel }: { designers: DesignerAcco
     const { data, error } = await supabase.from('brides').insert({
       name: f.name.trim(), initials: initialsOf(f.name), location: f.location || null,
       wedding_date: f.wedding_date || null, kyc: f.kyc || null, gatekeeper: f.gatekeeper || null,
+      currency: f.currency,
     }).select().single()
     if (error) { setSaving(false); setErr(error.message); return }
     if (data && f.wsName.trim()) {
       await supabase.from('projects').insert({
         bride_id: (data as Bride).id, name: f.wsName.trim(),
-        designer: f.wsDesigner || null, designer_id: f.wsDesignerId || null, sort_order: 0,
+        designer: f.wsDesigner || null, designer_id: f.wsDesignerId || null,
+        service: f.wsService || null, sort_order: 0,
       })
     }
     setSaving(false)
@@ -1315,6 +1410,13 @@ function AddBrideForm({ designers, onDone, onCancel }: { designers: DesignerAcco
         <div><label className="text-[10px] text-gray-400 block mb-1">Location</label><input className={input} value={f.location} onChange={e => setF({ ...f, location: e.target.value })} /></div>
         <div><label className="text-[10px] text-gray-400 block mb-1">Wedding date</label><input type="date" className={input} value={f.wedding_date} onChange={e => setF({ ...f, wedding_date: e.target.value })} /></div>
         <div><label className="text-[10px] text-gray-400 block mb-1">Gatekeeper 🔒</label><input className={input} value={f.gatekeeper} onChange={e => setF({ ...f, gatekeeper: e.target.value })} placeholder="Who signs off" /></div>
+        <div>
+          <label className="text-[10px] text-gray-400 block mb-1">Billing currency</label>
+          <select className={input} value={f.currency} onChange={e => setF({ ...f, currency: e.target.value })}>
+            {CURRENCIES.map(c => <option key={c}>{c}</option>)}
+          </select>
+          <p className="text-[9px] text-gray-400 mt-1">MYR Malaysia · SGD Singapore · USD international</p>
+        </div>
       </div>
       <div className="mb-3">
         <label className="text-[10px] text-gray-400 block mb-1">KYC / internal notes 🔒</label>
@@ -1325,8 +1427,7 @@ function AddBrideForm({ designers, onDone, onCancel }: { designers: DesignerAcco
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-[10px] text-gray-400 block mb-1">Workstream</label>
-            <input className={input} list="ws-presets" value={f.wsName} onChange={e => setF({ ...f, wsName: e.target.value })} />
-            <datalist id="ws-presets">{WORKSTREAM_PRESETS.map(w => <option key={w} value={w} />)}</datalist>
+            <WorkstreamNameField className={input} value={f.wsName} onChange={v => setF({ ...f, wsName: v })} />
           </div>
           <div>
             <label className="text-[10px] text-gray-400 block mb-1">Designer</label>
@@ -1337,6 +1438,13 @@ function AddBrideForm({ designers, onDone, onCancel }: { designers: DesignerAcco
               }}>
               <option value="">Unassigned</option>
               {designers.map(d => <option key={d.id} value={d.id}>{d.full_name || d.email}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] text-gray-400 block mb-1">Service (from the pricing deck)</label>
+            <select className={input} value={f.wsService} onChange={e => setF({ ...f, wsService: e.target.value })}>
+              <option value="">Not set</option>
+              {SERVICES.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
         </div>
@@ -1390,8 +1498,19 @@ function AddProspectForm({ onDone, onCancel }: { onDone: () => void; onCancel: (
 }
 
 const PRESET_TIMELINE = [
-  'Kickoff brief', 'Mood board approval', 'Design concept', 'Design sign-off',
-  'Fabric sourcing', 'First toile fitting', 'Second fitting', 'Final fitting', 'Delivery',
+  'Kickoff (confirm offerings)',
+  'Moodboard + Brief',
+  'Bill deposit',
+  'Sketches / design concept released',
+  'Design sign-off',
+  'Fabric sourcing',
+  'Production of dummy dress & status updates from designer',
+  'First fitting (toile)',
+  'Bill first 50%',
+  'Second fitting',
+  'Final fitting',
+  'Bill balance 50%',
+  'Delivery / handover',
 ]
 
 function TimelineEditor({ brideId, projectId }: { brideId: string; projectId: string }) {
@@ -1477,7 +1596,7 @@ function TimelineEditor({ brideId, projectId }: { brideId: string; projectId: st
           <p className="text-xs text-gray-500 mb-3">No milestones yet</p>
           <button onClick={addPreset} disabled={busy}
             className="text-xs px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50">
-            {busy ? 'Adding…' : 'Use standard 9-step timeline'}
+            {busy ? 'Adding…' : `Use standard ${PRESET_TIMELINE.length}-step timeline`}
           </button>
         </div>
       ) : (
@@ -1548,6 +1667,7 @@ function BrideDetail({ bride, projects, milestones, designers, onBack, onSaved, 
     const { error } = await supabase.from('brides').update({
       name: b.name, initials: initialsOf(b.name), location: b.location,
       wedding_date: b.wedding_date || null, kyc: b.kyc, gatekeeper: b.gatekeeper,
+      currency: b.currency || 'MYR',
     }).eq('id', bride.id)
     setSaving(false)
     setMsg(error ? error.message : 'Saved ✓')
@@ -1572,7 +1692,7 @@ function BrideDetail({ bride, projects, milestones, designers, onBack, onSaved, 
         <span className="text-sm font-medium">{bride.name}</span>
         <span className="text-[10px] text-gray-400">Wedding {prettyDate(bride.wedding_date)}</span>
         {canSeeMoney && t.total > 0 && (
-          <span className="text-[10px] text-gray-400">· {money(t.total)} total · {Math.round((t.paid / t.total) * 100)}% paid</span>
+          <span className="text-[10px] text-gray-400">· {money(t.total, bride.currency)} total · {Math.round((t.paid / t.total) * 100)}% paid</span>
         )}
       </div>
 
@@ -1609,7 +1729,7 @@ function BrideDetail({ bride, projects, milestones, designers, onBack, onSaved, 
           <div className="space-y-3">
             {projects.map((p, i) => (
               <WorkstreamCard
-                key={p.id} project={p} index={i} brideId={bride.id} designers={designers}
+                key={p.id} project={p} index={i} brideId={bride.id} currency={bride.currency} designers={designers}
                 milestones={milestones.filter(m => m.project_id === p.id)}
                 isOpen={openProject === p.id}
                 onToggle={() => setOpenProject(openProject === p.id ? null : p.id)}
@@ -1628,6 +1748,13 @@ function BrideDetail({ bride, projects, milestones, designers, onBack, onSaved, 
               <div><label className="text-[10px] text-gray-400 block mb-1">Name</label><input className={input} value={b.name} onChange={e => setB({ ...b, name: e.target.value })} /></div>
               <div><label className="text-[10px] text-gray-400 block mb-1">Location</label><input className={input} value={b.location || ''} onChange={e => setB({ ...b, location: e.target.value })} /></div>
               <div><label className="text-[10px] text-gray-400 block mb-1">Wedding date</label><input type="date" className={input} value={b.wedding_date || ''} onChange={e => setB({ ...b, wedding_date: e.target.value })} /></div>
+              <div>
+                <label className="text-[10px] text-gray-400 block mb-1">Billing currency</label>
+                <select className={input} value={b.currency || 'MYR'} onChange={e => setB({ ...b, currency: e.target.value })}>
+                  {CURRENCIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+                <p className="text-[9px] text-gray-400 mt-1">MYR Malaysia · SGD Singapore · USD international — applies to all her workstreams</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={saveBride} disabled={saving} className="text-xs px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50">
@@ -1690,10 +1817,11 @@ function BrideDetail({ bride, projects, milestones, designers, onBack, onSaved, 
   )
 }
 
-function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen, onToggle, onSaved, canSeeMoney, canDelete, canAssign }: {
+function WorkstreamCard({ project, index, brideId, currency, designers, milestones, isOpen, onToggle, onSaved, canSeeMoney, canDelete, canAssign }: {
   project: Project
   index: number
   brideId: string
+  currency: string | null
   designers: DesignerAccount[]
   milestones: Milestone[]
   isOpen: boolean
@@ -1722,6 +1850,8 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
     if (canAssign) {
       payload.designer = p.designer
       payload.designer_id = p.designer_id
+      payload.service = p.service || null
+      payload.engagement_type = p.engagement_type || 'Bespoke'
     }
     if (canSeeMoney) {
       payload.total = Number(p.total) || 0
@@ -1753,13 +1883,15 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
           <span className="text-gray-300 text-xs">{index + 1}.</span>
           <p className="text-sm font-semibold text-gray-900">{project.name}</p>
           <Badge label={project.status} color={project.status_color} />
+          {project.engagement_type === 'Rental' && <Badge label="Rental" color="coral" />}
           {overdue > 0 && <span className="text-[9px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded-full">{overdue} overdue</span>}
           <span className="ml-auto text-gray-300 text-xs">{isOpen ? '▲' : '▼'}</span>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <p className="text-[11px] text-gray-500">👤 {project.designer || 'No designer assigned'}</p>
+          {project.service && <p className="text-[11px] text-gray-400">✦ {project.service}</p>}
           {canSeeMoney && project.total > 0 && (
-            <p className="text-[11px] text-gray-400">{money(project.paid)} of {money(project.total)}</p>
+            <p className="text-[11px] text-gray-400">{money(project.paid, currency)} of {money(project.total, currency)}</p>
           )}
           {milestones.length > 0 && <p className="text-[11px] text-gray-400">{done}/{milestones.length} milestones</p>}
         </div>
@@ -1792,8 +1924,7 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-gray-400 block mb-1">Workstream name</label>
-                <input className={input} list="ws-presets-2" value={p.name} onChange={e => setP({ ...p, name: e.target.value })} />
-                <datalist id="ws-presets-2">{WORKSTREAM_PRESETS.map(w => <option key={w} value={w} />)}</datalist>
+                <WorkstreamNameField className={input} value={p.name} onChange={v => setP({ ...p, name: v })} />
               </div>
               <div>
                 <label className="text-[10px] text-gray-400 block mb-1">Designer</label>
@@ -1815,14 +1946,34 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
                   <div className="text-xs px-3 py-2 rounded-lg bg-gray-100 text-gray-600">{p.designer || 'Unassigned'}</div>
                 )}
               </div>
+              <div><label className="text-[10px] text-gray-400 block mb-1">Service (from the pricing deck)</label>
+                {canAssign ? (
+                  <select className={input} value={p.service || ''} onChange={e => setP({ ...p, service: e.target.value || null })}>
+                    <option value="">Not set</option>
+                    {SERVICES.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                ) : (
+                  <div className="text-xs px-3 py-2 rounded-lg bg-gray-100 text-gray-600">{p.service || 'Not set'}</div>
+                )}
+              </div>
+              <div><label className="text-[10px] text-gray-400 block mb-1">Bespoke or rental</label>
+                {canAssign ? (
+                  <select className={input} value={p.engagement_type || 'Bespoke'} onChange={e => setP({ ...p, engagement_type: e.target.value })}>
+                    {ENGAGEMENTS.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                ) : (
+                  <div className="text-xs px-3 py-2 rounded-lg bg-gray-100 text-gray-600">{p.engagement_type || 'Bespoke'}</div>
+                )}
+              </div>
               <div><label className="text-[10px] text-gray-400 block mb-1">Status</label>
                 <select className={input} value={p.status} onChange={e => setP({ ...p, status: e.target.value })}>
-                  {STATUSES.map(s => <option key={s}>{s}</option>)}
+                  {statusOptionsFor(p.service, p.status).map(s => <option key={s}>{s}</option>)}
                 </select>
+                {!isRCL(p.service) && <p className="text-[9px] text-gray-400 mt-1">&ldquo;In progress&rdquo; unlocks when the service is RCL</p>}
               </div>
               <div><label className="text-[10px] text-gray-400 block mb-1">Status colour</label>
                 <select className={input} value={p.status_color} onChange={e => setP({ ...p, status_color: e.target.value })}>
-                  <option value="blue">Blue</option><option value="amber">Amber</option><option value="teal">Teal</option><option value="coral">Coral</option><option value="green">Green</option>
+                  <option value="blue">Blue</option><option value="amber">Amber</option><option value="teal">Teal</option><option value="coral">Coral</option><option value="green">Green</option><option value="purple">Purple</option>
                 </select>
               </div>
               <div className="col-span-2">
@@ -1844,13 +1995,14 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
 
           {tab === 'payments' && canSeeMoney && (
             <div>
+              <p className="text-[10px] text-gray-400 mb-2">Billed in {currency || 'MYR'} — change it under the bride&rsquo;s Client details</p>
               <div className="grid grid-cols-3 gap-3 mb-3">
-                <div><label className="text-[10px] text-gray-400 block mb-1">Contract total</label><input type="number" className={input} value={p.total || 0} onChange={e => setP({ ...p, total: Number(e.target.value) })} /></div>
-                <div><label className="text-[10px] text-gray-400 block mb-1">Amount paid</label><input type="number" className={input} value={p.paid || 0} onChange={e => setP({ ...p, paid: Number(e.target.value) })} /></div>
+                <div><label className="text-[10px] text-gray-400 block mb-1">Contract total ({currency || 'MYR'})</label><input type="number" className={input} value={p.total || 0} onChange={e => setP({ ...p, total: Number(e.target.value) })} /></div>
+                <div><label className="text-[10px] text-gray-400 block mb-1">Amount paid ({currency || 'MYR'})</label><input type="number" className={input} value={p.paid || 0} onChange={e => setP({ ...p, paid: Number(e.target.value) })} /></div>
                 <div><label className="text-[10px] text-gray-400 block mb-1">Margin %</label><input type="number" className={input} value={p.margin || 0} onChange={e => setP({ ...p, margin: Number(e.target.value) })} /></div>
               </div>
               <div className="grid grid-cols-3 gap-3 mb-3">
-                {[['Contract', money(p.total), ''], ['Collected', money(p.paid), 'text-emerald-600'], ['Outstanding', money((p.total || 0) - (p.paid || 0)), 'text-red-500']].map(([l, v, c], i) => (
+                {[['Contract', money(p.total, currency), ''], ['Collected', money(p.paid, currency), 'text-emerald-600'], ['Outstanding', money((p.total || 0) - (p.paid || 0), currency), 'text-red-500']].map(([l, v, c], i) => (
                   <div key={i} className="bg-white rounded-lg p-2.5"><p className="text-[9px] text-gray-400">{l}</p><p className={`text-sm font-semibold ${c}`}>{v}</p></div>
                 ))}
               </div>
@@ -1868,7 +2020,7 @@ function WorkstreamCard({ project, index, brideId, designers, milestones, isOpen
 function AddWorkstreamForm({ brideId, nextOrder, designers, onDone, onCancel }: {
   brideId: string; nextOrder: number; designers: DesignerAccount[]; onDone: () => void; onCancel: () => void
 }) {
-  const [f, setF] = useState({ name: '', designer: '', designerId: '', total: '', paid: '', margin: '', status: 'Brief confirmed', status_color: 'teal', brief: '' })
+  const [f, setF] = useState({ name: '', designer: '', designerId: '', total: '', paid: '', margin: '', status: 'Brief confirmed', status_color: 'teal', brief: '', service: '', engagement_type: 'Bespoke' })
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -1879,6 +2031,7 @@ function AddWorkstreamForm({ brideId, nextOrder, designers, onDone, onCancel }: 
       bride_id: brideId, name: f.name.trim(),
       designer: f.designer || null, designer_id: f.designerId || null,
       status: f.status, status_color: f.status_color, brief: f.brief || null,
+      service: f.service || null, engagement_type: f.engagement_type,
       total: Number(f.total) || 0, paid: Number(f.paid) || 0, margin: Number(f.margin) || 0,
       sort_order: nextOrder,
     })
@@ -1895,8 +2048,7 @@ function AddWorkstreamForm({ brideId, nextOrder, designers, onDone, onCancel }: 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
           <label className="text-[10px] text-gray-400 block mb-1">Workstream *</label>
-          <input className={input} list="ws-presets-3" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="e.g. Cheongsam" />
-          <datalist id="ws-presets-3">{WORKSTREAM_PRESETS.map(w => <option key={w} value={w} />)}</datalist>
+          <WorkstreamNameField className={input} value={f.name} onChange={v => setF({ ...f, name: v })} />
         </div>
         <div>
           <label className="text-[10px] text-gray-400 block mb-1">Designer</label>
@@ -1909,14 +2061,25 @@ function AddWorkstreamForm({ brideId, nextOrder, designers, onDone, onCancel }: 
             {designers.map(d => <option key={d.id} value={d.id}>{d.full_name || d.email}</option>)}
           </select>
         </div>
+        <div><label className="text-[10px] text-gray-400 block mb-1">Service (from the pricing deck)</label>
+          <select className={input} value={f.service} onChange={e => setF({ ...f, service: e.target.value })}>
+            <option value="">Not set</option>
+            {SERVICES.map(s => <option key={s}>{s}</option>)}
+          </select>
+        </div>
+        <div><label className="text-[10px] text-gray-400 block mb-1">Bespoke or rental</label>
+          <select className={input} value={f.engagement_type} onChange={e => setF({ ...f, engagement_type: e.target.value })}>
+            {ENGAGEMENTS.map(s => <option key={s}>{s}</option>)}
+          </select>
+        </div>
         <div><label className="text-[10px] text-gray-400 block mb-1">Status</label>
           <select className={input} value={f.status} onChange={e => setF({ ...f, status: e.target.value })}>
-            {STATUSES.map(s => <option key={s}>{s}</option>)}
+            {statusOptionsFor(f.service, f.status).map(s => <option key={s}>{s}</option>)}
           </select>
         </div>
         <div><label className="text-[10px] text-gray-400 block mb-1">Status colour</label>
           <select className={input} value={f.status_color} onChange={e => setF({ ...f, status_color: e.target.value })}>
-            <option value="teal">Teal</option><option value="blue">Blue</option><option value="amber">Amber</option><option value="coral">Coral</option><option value="green">Green</option>
+            <option value="teal">Teal</option><option value="blue">Blue</option><option value="amber">Amber</option><option value="coral">Coral</option><option value="green">Green</option><option value="purple">Purple</option>
           </select>
         </div>
         <div><label className="text-[10px] text-gray-400 block mb-1">Contract total</label><input type="number" className={input} value={f.total} onChange={e => setF({ ...f, total: e.target.value })} /></div>
